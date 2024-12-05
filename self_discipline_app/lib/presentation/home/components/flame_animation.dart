@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
 enum CustomLottie {
-  flame;
+  flame,
+  explosion,
+  brain_explosion;
 
   String get path => 'assets/lotties/$name.json';
 
-  Widget get toWidget => Lottie.asset(path, height: 24, width: 24);
+  Widget toWidget({double width = 24.0, double height = 24}) {
+    return Lottie.asset(path, width: width, height: height);
+  }
 }

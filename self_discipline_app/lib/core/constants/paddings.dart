@@ -6,6 +6,7 @@ enum ProjectRadiusType {
   mediumRadius(8),
   normalRadius(12),
   largeRadius(16),
+  xLargeRadius(20),
   extraLargeRadius(24);
 
   final double value;
@@ -33,6 +34,7 @@ enum ProjectRadiusType {
 enum ProjectPaddingType {
   defaultPadding(16.0),
   smallPadding(8.0),
+  xSmallPadding(6.0),
   largePadding(24.0),
   extraLargePadding(32.0);
 
