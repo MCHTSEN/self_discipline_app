@@ -220,7 +220,7 @@ class _LineChartSample5State extends State<LineChartSample5> {
                         constraints.maxWidth,
                       );
                     },
-                    reservedSize: 30,
+                    reservedSize: 29,
                   ),
                 ),
                 rightTitles: const AxisTitles(
