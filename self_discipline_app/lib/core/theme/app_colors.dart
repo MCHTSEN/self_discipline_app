@@ -7,7 +7,6 @@ class AppColors {
   static const Color primaryYellow = Color(0xffE7FF55);
   static const Color primaryGreen = Color(0xffB9D2B3);
 
-
   // Secondary colors
   static const Color secondaryLight = Color(0xFF03DAC6);
   static const Color secondaryDark = Color(0xFF018786);
@@ -28,4 +27,13 @@ class AppColors {
   static const Color textSecondaryLight = Color(0xFF666666);
   static const Color textPrimaryDark = Color(0xFFFFFFFF);
   static const Color textSecondaryDark = Color.fromARGB(255, 203, 203, 203);
+}
+
+class AppSecondaryColors {
+  static const Color darkVoid = Color(0xFF151419);
+  static const Color liquidLava = Color(0xFFF56E0F);
+  static const Color gluonGrey = Color(0xFF1B1B1E);
+  static const Color slateGrey = Color(0xFF262626);
+  static const Color dustyGrey = Color(0xFF878787);
+  static const Color snow = Color(0xFFFBFBFB);
 }

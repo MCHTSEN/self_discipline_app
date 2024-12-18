@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:self_discipline_app/core/constants/paddings.dart';
 import 'package:self_discipline_app/core/helper/gap.dart';
 import 'package:self_discipline_app/core/theme/app_colors.dart';
-import 'package:self_discipline_app/presentation/home/components/flame_animation.dart';
+import 'package:self_discipline_app/presentation/pages/home/components/flame_animation.dart';
 
 class HabitWidget extends StatefulWidget {
   final Color? color;
