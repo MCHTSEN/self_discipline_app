@@ -1,9 +1,11 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:self_discipline_app/presentation/pages/habit_creation_page.dart';
 import '../viewmodels/habit_list_notifier.dart';
 import '../widgets/habit_card.dart';
 
+@RoutePage()
 class HabitListPage extends ConsumerWidget {
   const HabitListPage({super.key});
 

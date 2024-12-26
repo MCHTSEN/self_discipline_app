@@ -38,7 +38,7 @@ class _DailyStreakWidgetState extends State<DailyStreakWidget> {
                   style: Theme.of(context).textTheme.labelLarge!.copyWith(),
                 ),
                 Gap.low,
-                const StreakIndicator(streak: '5'),
+                StreakIndicator(streak: 5),
               ],
             ),
           ],

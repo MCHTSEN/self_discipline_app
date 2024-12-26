@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:self_discipline_app/core/constants/paddings.dart';
@@ -11,7 +12,11 @@ import 'package:self_discipline_app/presentation/widgets/line_chart.dart';
 import 'package:self_discipline_app/presentation/viewmodels/habit_list_notifier.dart';
 import 'package:self_discipline_app/presentation/widgets/predict_line_chart.dart';
 import '../../../domain/entities/habit_entity.dart';
+import 'package:self_discipline_app/presentation/widgets/streak_celebration.dart';
+import 'package:flutter/foundation.dart';
+import 'package:self_discipline_app/presentation/viewmodels/providers.dart';
 
+@RoutePage()
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
@@ -23,80 +28,145 @@ class HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final habitListState = ref.watch(habitListProvider);
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor =
+        isDarkMode ? AppSecondaryColors.snow : AppSecondaryColors.darkVoid;
 
-    // Bu widget habitListState'in durumuna göre habitleri gösterir.
     Widget habitsSection = habitListState.when(
       data: (habits) {
         if (habits.isEmpty) {
           return const Text('No habits found. Add a new habit.');
         }
-        // Habits çok olursa kaydırılabilir bir alan lazım
+
+        final completedHabits = habits
+            .where((h) => h.lastCompletedAt?.day == DateTime.now().day)
+            .toList();
+        final uncompletedHabits = habits
+            .where((h) => h.lastCompletedAt?.day != DateTime.now().day)
+            .toList();
+
         return Expanded(
-          child: ListView.builder(
-            itemCount: habits.length,
-            itemBuilder: (context, index) {
-              final HabitEntity habit = habits[index];
-              // HabitWidget'a uygun veriler sağlanır.
-              // Eğer habit.iconPath emoji ise direkt verebilirsiniz.
-              // durationInMinutes için targetDuration varsa kullanılır, yoksa 0 verilir.
-              return Column(
-                children: [
-                  HabitWidget(
-                    title: habit.title,
-                    durationInMinutes: habit.targetDuration?.inMinutes ?? 0,
-                    icon: _resolveIcon(habit.iconPath),
+          child: CustomScrollView(
+            slivers: [
+              // Uncompleted Habits
+              if (uncompletedHabits.isNotEmpty) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      'To Complete',
+                      style: TextStyle(
+                        color: AppSecondaryColors.dustyGrey,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
-                  Gap.low,
-                ],
-              );
-            },
+                ),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final habit = uncompletedHabits[index];
+                      return HabitWidget(
+                        habit: habit,
+                        onComplete: () {
+                          ref
+                              .read(habitListProvider.notifier)
+                              .completeHabit(habit.id);
+                        },
+                        isCompleted: false,
+                      );
+                    },
+                    childCount: uncompletedHabits.length,
+                  ),
+                ),
+              ],
+
+              // Completed Habits
+              if (completedHabits.isNotEmpty) ...[
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      'Completed Today',
+                      style: TextStyle(
+                        color: AppSecondaryColors.dustyGrey,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final habit = completedHabits[index];
+                      return HabitWidget(
+                        habit: habit,
+                        onComplete: () {},
+                        isCompleted: true,
+                      );
+                    },
+                    childCount: completedHabits.length,
+                  ),
+                ),
+              ],
+            ],
           ),
         );
       },
-      loading: () =>
-          const Expanded(child: Center(child: CircularProgressIndicator())),
-      error: (err, stack) =>
-          Expanded(child: Center(child: Text('Error: $err'))),
+      loading: () => const Expanded(
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (err, stack) => Expanded(
+        child: Center(child: Text('Error: $err')),
+      ),
     );
 
-    return BaseBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const HabitCreationPage()),
-            );
-          },
-          child: const Icon(Icons.add),
-        ),
-        body: SafeArea(
-          child: Padding(
-            padding:
-                ProjectPaddingType.defaultPadding.symmetricHorizontalPadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _nameAndSettings(context),
-                _quote(context),
-                Gap.normal,
-                const DailyStreakWidget(),
-                Gap.normal,
-                // Örneğin bir grafik gösterimi
-                const LineChartSample5(),
-                Text(
-                  'Today\'s Tasks',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                Gap.low,
-                // Burada artık hard-coded HabitWidget'lar yerine dinamik liste geliyor
-                habitsSection,
-              ],
+    return Stack(
+      children: [
+        Scaffold(
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: AppSecondaryColors.liquidLava,
+            foregroundColor: AppSecondaryColors.snow,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HabitCreationPage()),
+              );
+            },
+            child: const Icon(Icons.add),
+          ),
+          body: SafeArea(
+            child: Padding(
+              padding:
+                  ProjectPaddingType.defaultPadding.symmetricHorizontalPadding,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _nameAndSettings(context),
+                  _quote(context),
+                  Gap.normal,
+                  const DailyStreakWidget(),
+                  Gap.normal,
+                  // Örneğin bir grafik gösterimi
+                  const LineChartSample5(),
+                  Text(
+                    'Today\'s Tasks',
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: textColor,
+                        ),
+                  ),
+                  Gap.low,
+                  // Burada artık hard-coded HabitWidget'lar yerine dinamik liste geliyor
+                  habitsSection,
+                ],
+              ),
             ),
           ),
         ),
-      ),
+        const StreakCelebration(),
+      ],
     );
   }
 
@@ -106,7 +176,7 @@ class HomePageState extends ConsumerState<HomePage> {
       style: Theme.of(context)
           .textTheme
           .bodyLarge!
-          .copyWith(color: AppColors.textSecondaryDark),
+          .copyWith(color: AppSecondaryColors.darkVoid),
     );
   }
 
@@ -115,18 +185,42 @@ class HomePageState extends ConsumerState<HomePage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-          child: Text('Hello, Mucahit',
-              style: Theme.of(context).textTheme.headlineLarge),
+          child: Text(
+            'Hello, Mucahit',
+            style: Theme.of(context).textTheme.headlineLarge,
+          ),
         ),
-        IconButton(onPressed: () {}, icon: const Icon(Icons.settings))
+        // Debug mode'da görünecek cache temizleme butonu
+        if (kDebugMode)
+          IconButton(
+            onPressed: () async {
+              final habitBox = ref.read(habitBoxProvider);
+              final completionBox = ref.read(completionBoxProvider);
+
+              await habitBox.clear();
+              await completionBox.clear();
+
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Cache cleared'),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+              }
+            },
+            icon: const Icon(Icons.cleaning_services),
+            tooltip: 'Clear Cache (Debug)',
+          ),
+        IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.settings),
+        ),
       ],
     );
   }
 
   String _resolveIcon(String iconPath) {
-    // Eğer iconPath bir emoji ise direk geri dönebiliriz.
-    // Eğer değilse bir placeholder emoji dönüyoruz.
-    // Gerçek projede iconPath'e göre logic ekleyin.
     return iconPath.isNotEmpty ? iconPath : '🔥';
   }
 }

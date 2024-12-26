@@ -1,22 +1,24 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
+import 'package:self_discipline_app/data/models/habit_model.dart';
 import 'package:self_discipline_app/domain/entities/habit_entity.dart';
 import 'package:self_discipline_app/domain/usecases/get_habits_usecase.dart';
 import 'package:self_discipline_app/domain/usecases/create_habit_usecase.dart';
 import 'package:self_discipline_app/domain/usecases/update_habit_usecase.dart';
 import 'package:self_discipline_app/domain/usecases/delete_habit_usecase.dart';
+import 'package:self_discipline_app/presentation/viewmodels/streak_celebration_provider.dart';
 import 'providers.dart';
 
-final habitListProvider = StateNotifierProvider<HabitListNotifier, AsyncValue<List<HabitEntity>>>((ref) {
-  final getHabitsUseCase = ref.watch(getHabitsUseCaseProvider);
-  final createHabitUseCase = ref.watch(createHabitUseCaseProvider);
-  final updateHabitUseCase = ref.watch(updateHabitUseCaseProvider);
-  final deleteHabitUseCase = ref.watch(deleteHabitUseCaseProvider);
-  
+final habitListProvider =
+    StateNotifierProvider<HabitListNotifier, AsyncValue<List<HabitEntity>>>(
+        (ref) {
   return HabitListNotifier(
-    getHabits: getHabitsUseCase,
-    createHabit: createHabitUseCase,
-    updateHabit: updateHabitUseCase,
-    deleteHabit: deleteHabitUseCase,
+    getHabits: ref.watch(getHabitsUseCaseProvider),
+    createHabit: ref.watch(createHabitUseCaseProvider),
+    updateHabit: ref.watch(updateHabitUseCaseProvider),
+    deleteHabit: ref.watch(deleteHabitUseCaseProvider),
+    habitBox: ref.watch(habitBoxProvider),
+    streakCelebrationNotifier: ref.read(streakCelebrationProvider.notifier),
   );
 });
 
@@ -25,12 +27,16 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
   final CreateHabitUseCase createHabit;
   final UpdateHabitUseCase updateHabit;
   final DeleteHabitUseCase deleteHabit;
+  final Box<HabitModel> habitBox;
+  final StreakCelebrationNotifier streakCelebrationNotifier;
 
   HabitListNotifier({
     required this.getHabits,
     required this.createHabit,
     required this.updateHabit,
     required this.deleteHabit,
+    required this.habitBox,
+    required this.streakCelebrationNotifier,
   }) : super(const AsyncValue.loading()) {
     _init();
   }
@@ -90,5 +96,66 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
+  }
+
+  Future<void> completeHabit(String habitId) async {
+    final currentState = state;
+    if (!currentState.hasValue) return;
+
+    final habits = currentState.value!;
+    final habitIndex = habits.indexWhere((h) => h.id == habitId);
+    if (habitIndex == -1) return;
+
+    final habit = habits[habitIndex];
+    final now = DateTime.now();
+
+    // Streak hesaplama
+    int newStreak = habit.currentStreak;
+    if (habit.lastCompletedAt == null) {
+      newStreak = 1;
+    } else {
+      final difference = now.difference(habit.lastCompletedAt!);
+      if (habit.frequency == 'daily') {
+        if (difference.inDays == 0) return; // Aynı gün tekrar tamamlanamaz
+        if (difference.inDays == 1) {
+          newStreak++;
+        } else {
+          newStreak = 1; // Streak kırıldı
+        }
+      } else if (habit.frequency == 'weekly') {
+        if (difference.inDays < 7) return; // Haftalık hedef erken tamamlanamaz
+        if (difference.inDays <= 14) {
+          newStreak++;
+        } else {
+          newStreak = 1; // Streak kırıldı
+        }
+      }
+    }
+
+    final newBestStreak =
+        newStreak > habit.bestStreak ? newStreak : habit.bestStreak;
+
+    final updatedHabit = habit.copyWith(
+      currentStreak: newStreak,
+      bestStreak: newBestStreak,
+      lastCompletedAt: now,
+    );
+
+    // Streak milestone kontrolü
+    if (newStreak > 0 && newStreak % 7 == 0) {
+      _showStreakCelebration(newStreak);
+    }
+
+    final updatedHabits = [...habits];
+    updatedHabits[habitIndex] = updatedHabit;
+    state = AsyncValue.data(updatedHabits);
+
+    // Hive'a kaydet
+    final habitModel = HabitModel.fromEntity(updatedHabit);
+    await habitBox.put(habitId, habitModel);
+  }
+
+  void _showStreakCelebration(int streak) {
+    streakCelebrationNotifier.showCelebration(streak);
   }
 }
