@@ -2,50 +2,61 @@ class HabitEntity {
   final String id;
   final String title;
   final String iconPath;
-  final int targetAmount;
+  final String targetType; // 'duration' or 'quantity'
+  final int targetValue;
   final String frequency;
-  final Duration? targetDuration;
-  final DateTime notificationTime;
+  final List<int>? customDays;
+  final DateTime? notificationTime;
+  final int difficulty;
+  final DateTime? lastCompletedAt;
   final int currentStreak;
   final int bestStreak;
-  final DateTime? lastCompletedAt;
+  final List<DateTime> completions;
 
   const HabitEntity({
     required this.id,
     required this.title,
     required this.iconPath,
-    required this.targetAmount,
+    required this.targetType,
+    required this.targetValue,
     required this.frequency,
-    this.targetDuration,
-    required this.notificationTime,
+    this.customDays,
+    this.notificationTime,
+    required this.difficulty,
+    this.lastCompletedAt,
     this.currentStreak = 0,
     this.bestStreak = 0,
-    this.lastCompletedAt,
+    this.completions = const [],
   });
 
   HabitEntity copyWith({
-    String? id,
     String? title,
     String? iconPath,
-    int? targetAmount,
+    String? targetType,
+    int? targetValue,
     String? frequency,
-    Duration? targetDuration,
+    List<int>? customDays,
     DateTime? notificationTime,
+    int? difficulty,
+    DateTime? lastCompletedAt,
     int? currentStreak,
     int? bestStreak,
-    DateTime? lastCompletedAt,
+    List<DateTime>? completions,
   }) {
     return HabitEntity(
-      id: id ?? this.id,
+      id: id,
       title: title ?? this.title,
       iconPath: iconPath ?? this.iconPath,
-      targetAmount: targetAmount ?? this.targetAmount,
+      targetType: targetType ?? this.targetType,
+      targetValue: targetValue ?? this.targetValue,
       frequency: frequency ?? this.frequency,
-      targetDuration: targetDuration ?? this.targetDuration,
+      customDays: customDays ?? this.customDays,
       notificationTime: notificationTime ?? this.notificationTime,
+      difficulty: difficulty ?? this.difficulty,
+      lastCompletedAt: lastCompletedAt ?? this.lastCompletedAt,
       currentStreak: currentStreak ?? this.currentStreak,
       bestStreak: bestStreak ?? this.bestStreak,
-      lastCompletedAt: lastCompletedAt ?? this.lastCompletedAt,
+      completions: completions ?? this.completions,
     );
   }
 }

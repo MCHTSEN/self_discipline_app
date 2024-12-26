@@ -22,8 +22,6 @@ class HabitWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final completionCount = habit.targetAmount;
-    final currentCount = 0; // This should come from completion tracking
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -32,83 +30,23 @@ class HabitWidget extends StatelessWidget {
             ? AppSecondaryColors.gluonGrey.withOpacity(0.7)
             : AppSecondaryColors.snow,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isCompleted
-              ? AppSecondaryColors.liquidLava.withOpacity(0.5)
-              : AppSecondaryColors.slateGrey.withOpacity(0.2),
-        ),
       ),
       child: ListTile(
-        leading: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: isCompleted
-                ? AppSecondaryColors.liquidLava
-                : AppSecondaryColors.slateGrey.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Center(
-            child: Text(
-              habit.iconPath,
-              style: TextStyle(fontSize: 24),
-            ),
-          ),
+        leading: Text(
+          habit.iconPath,
+          style: const TextStyle(fontSize: 24),
         ),
-        title: Text(
-          habit.title,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            decoration: isCompleted ? TextDecoration.lineThrough : null,
-            color: isCompleted
-                ? AppSecondaryColors.dustyGrey
-                : isDarkMode
-                    ? AppSecondaryColors.snow
-                    : AppSecondaryColors.darkVoid,
-          ),
+        title: Text(habit.title),
+        subtitle: Text(
+          '${habit.targetValue}${habit.targetType == 'duration' ? ' min' : ' times'} | ${habit.frequency}',
+          style: Theme.of(context).textTheme.bodySmall,
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (completionCount > 1) ...[
-              const SizedBox(height: 4),
-              Row(
-                children: List.generate(
-                  completionCount,
-                  (index) => Container(
-                    width: 16,
-                    height: 4,
-                    margin: const EdgeInsets.only(right: 2),
-                    decoration: BoxDecoration(
-                      color: index < currentCount
-                          ? AppSecondaryColors.liquidLava
-                          : AppSecondaryColors.slateGrey.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-            Text(
-              habit.frequency,
-              style: TextStyle(
-                color: AppSecondaryColors.dustyGrey,
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-        trailing: !isCompleted
-            ? IconButton(
+        trailing: isCompleted
+            ? const Icon(Icons.check_circle,
+                color: AppSecondaryColors.dustyGrey)
+            : IconButton(
+                icon: const Icon(Icons.check_circle_outline),
                 onPressed: onComplete,
-                icon: Icon(
-                  Icons.check_circle_outline,
-                  color: AppSecondaryColors.liquidLava,
-                ),
-              )
-            : Icon(
-                Icons.check_circle,
-                color: AppSecondaryColors.liquidLava,
               ),
       ),
     );

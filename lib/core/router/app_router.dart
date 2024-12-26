@@ -16,7 +16,18 @@ class AppRouter extends _$AppRouter {
         CustomRoute(
           page: MainRoute.page,
           initial: true,
-          transitionsBuilder: TransitionsBuilders.fadeIn,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0.0, 1.0),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeInOut,
+              )),
+              child: child,
+            );
+          },
           children: [
             CustomRoute(
               page: HomeRoute.page,
@@ -38,31 +49,10 @@ class AppRouter extends _$AppRouter {
               page: HabitListRoute.page,
               transitionsBuilder: RouteTransitions.scaleTransition,
             ),
+            CustomRoute(page: HabitCreationRoute.page),
             CustomRoute(
-              page: HabitCreationRoute.page,
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0.0, 1.0),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeInOut,
-                    )),
-                    child: child,
-                  ),
-                );
-              },
-              durationInMilliseconds: 400,
-              reverseDurationInMilliseconds: 400,
-            ),
-            CustomRoute(
-              page: SettingsRoute.page,
-              transitionsBuilder: TransitionsBuilders.fadeIn,
-            ),
+                page: SettingsRoute.page,
+                transitionsBuilder: TransitionsBuilders.fadeIn),
           ],
         ),
       ];

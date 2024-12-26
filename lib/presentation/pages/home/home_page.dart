@@ -28,25 +28,41 @@ class HomePageState extends ConsumerState<HomePage> {
       children: [
         Scaffold(
           body: SafeArea(
-            child: Padding(
-              padding:
-                  ProjectPaddingType.defaultPadding.symmetricHorizontalPadding,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const HeaderSection(),
-                  Text('🚀 Small steps lead to big changes.',
-                      style: Theme.of(context).textTheme.bodyLarge),
-                  Gap.normal,
-                  const DailyStreakWidget(),
-                  Gap.normal,
-                  const LineChartSample5(),
-                  Text('Today\'s Tasks',
-                      style: Theme.of(context).textTheme.labelLarge),
-                  Gap.low,
-                  _buildHabitsSection(habitListState),
-                ],
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: ProjectPaddingType
+                      .defaultPadding.symmetricHorizontalPadding,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const HeaderSection(),
+                      Text('🚀 Small steps lead to big changes.',
+                          style: Theme.of(context).textTheme.bodyLarge),
+                    ],
+                  ),
+                ),
+                Gap.normal,
+                const DailyStreakWidget(),
+                Gap.normal,
+                Expanded(
+                  child: Padding(
+                    padding: ProjectPaddingType
+                        .defaultPadding.symmetricHorizontalPadding,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const LineChartSample5(),
+                        Text('Today\'s Tasks',
+                            style: Theme.of(context).textTheme.labelLarge),
+                        Gap.low,
+                        _buildHabitsSection(habitListState),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

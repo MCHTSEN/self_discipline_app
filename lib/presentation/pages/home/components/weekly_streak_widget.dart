@@ -15,8 +15,10 @@ class DailyStreakWidget extends StatefulWidget {
 
 class _DailyStreakWidgetState extends State<DailyStreakWidget> {
   DateTime currentDate = DateTime.now();
-  DateTime startDate = DateTime.now().subtract(const Duration(days: 2));
-  DateTime endDate = DateTime.now().add(const Duration(days: 14));
+
+  // Get first and last day of current month
+  DateTime get startDate => DateTime(currentDate.year, currentDate.month, 1);
+  DateTime get endDate => DateTime(currentDate.year, currentDate.month + 1, 0);
   String get _currentDate => DateFormat('MMMM').format(currentDate);
 
   @override
@@ -24,24 +26,27 @@ class _DailyStreakWidgetState extends State<DailyStreakWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              _currentDate,
-              style: Theme.of(context).textTheme.labelLarge!.copyWith(),
-            ),
-            Row(
-              children: [
-                Text(
-                  'Streak:',
-                  style: Theme.of(context).textTheme.labelLarge!.copyWith(),
-                ),
-                Gap.low,
-                StreakIndicator(streak: 5),
-              ],
-            ),
-          ],
+        Padding(
+          padding: ProjectPaddingType.defaultPadding.symmetricHorizontalPadding,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _currentDate,
+                style: Theme.of(context).textTheme.labelLarge!.copyWith(),
+              ),
+              Row(
+                children: [
+                  Text(
+                    'Streak:',
+                    style: Theme.of(context).textTheme.labelLarge!.copyWith(),
+                  ),
+                  Gap.low,
+                  StreakIndicator(streak: 5),
+                ],
+              ),
+            ],
+          ),
         ),
         Gap.low,
         SingleChildScrollView(
@@ -49,7 +54,7 @@ class _DailyStreakWidgetState extends State<DailyStreakWidget> {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: List.generate(
-              (endDate.difference(startDate).inDays + 1),
+              endDate.day, // Use total days in current month
               (index) {
                 DateTime date = startDate.add(Duration(days: index));
                 bool isCompleted = date.isBefore(DateTime.now());
