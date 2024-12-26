@@ -7,8 +7,13 @@ import 'package:self_discipline_app/domain/usecases/create_habit_usecase.dart';
 import 'package:self_discipline_app/domain/usecases/delete_habit_usecase.dart';
 import 'package:self_discipline_app/domain/usecases/get_habits_usecase.dart';
 import 'package:self_discipline_app/domain/usecases/update_habit_usecase.dart';
+import 'package:self_discipline_app/presentation/viewmodels/settings_notifier.dart';
 
 final habitBoxProvider = Provider<Box<HabitModel>>((ref) {
+  throw UnimplementedError();
+});
+
+final settingBoxProvider = Provider<Box<AppSettings>>((ref) {
   throw UnimplementedError();
 });
 

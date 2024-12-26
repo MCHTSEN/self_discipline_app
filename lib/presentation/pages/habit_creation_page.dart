@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:self_discipline_app/core/theme/app_colors.dart';
+import 'package:self_discipline_app/core/utils/logger.dart';
 import 'package:self_discipline_app/domain/entities/habit_entity.dart';
 import 'package:self_discipline_app/presentation/viewmodels/create_habit_notifier.dart';
 import 'package:self_discipline_app/presentation/viewmodels/habit_list_notifier.dart';
@@ -124,6 +125,7 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
 
   @override
   Widget build(BuildContext context) {
+    Logger.pageBuild('HabitCreationPage');
     final createState = ref.watch(createHabitNotifierProvider);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
