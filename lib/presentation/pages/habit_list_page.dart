@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:self_discipline_app/core/utils/logger.dart';
 import 'package:self_discipline_app/presentation/pages/habit_creation_page.dart';
 import '../viewmodels/habit_list_notifier.dart';
 import '../widgets/habit_card.dart';
@@ -11,6 +12,7 @@ class HabitListPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    Logger.pageBuild('HabitListPage');
     final habitListState = ref.watch(habitListProvider);
 
     return Scaffold(
@@ -18,6 +20,7 @@ class HabitListPage extends ConsumerWidget {
       body: habitListState.when(
         data: (habits) {
           return ListView.builder(
+            primary: false,
             itemCount: habits.length,
             itemBuilder: (context, index) {
               final habit = habits[index];
