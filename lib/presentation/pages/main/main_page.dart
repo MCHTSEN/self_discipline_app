@@ -16,6 +16,7 @@ class MainPage extends StatelessWidget {
           HomeRoute(),
           HabitListRoute(),
           HabitCreationRoute(),
+          SettingsRoute(),
         ],
         bottomNavigationBuilder: (_, tabsRouter) {
           return BottomNavigationBar(
@@ -33,6 +34,10 @@ class MainPage extends StatelessWidget {
               BottomNavigationBarItem(
                 icon: Icon(Icons.add),
                 label: 'Create',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.settings),
+                label: 'Settings',
               ),
             ],
           );
