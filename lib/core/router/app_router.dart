@@ -5,6 +5,7 @@ import 'package:self_discipline_app/presentation/pages/home/home_page.dart';
 import 'package:self_discipline_app/presentation/pages/habit_list_page.dart';
 import 'package:self_discipline_app/presentation/pages/main/main_page.dart';
 import 'package:self_discipline_app/core/router/route_transitions.dart';
+import 'package:self_discipline_app/presentation/pages/settings/settings_page.dart';
 
 part 'app_router.gr.dart';
 
@@ -57,6 +58,10 @@ class AppRouter extends _$AppRouter {
               },
               durationInMilliseconds: 400,
               reverseDurationInMilliseconds: 400,
+            ),
+            CustomRoute(
+              page: SettingsRoute.page,
+              transitionsBuilder: TransitionsBuilders.fadeIn,
             ),
           ],
         ),
