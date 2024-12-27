@@ -15,11 +15,42 @@ class DailyStreakWidget extends StatefulWidget {
 
 class _DailyStreakWidgetState extends State<DailyStreakWidget> {
   DateTime currentDate = DateTime.now();
+  late ScrollController _scrollController;
 
   // Get first and last day of current month
   DateTime get startDate => DateTime(currentDate.year, currentDate.month, 1);
-  DateTime get endDate => DateTime(currentDate.year, currentDate.month + 1, 0);
+  DateTime get endDate => DateTime(currentDate.year, currentDate.month, 0);
   String get _currentDate => DateFormat('MMMM').format(currentDate);
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    // Scroll to current date after build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToCurrentDate();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToCurrentDate() {
+    // Calculate scroll offset based on current date
+    final dayWidth = 68.0; // Container width (60) + margin (8)
+    final currentDayIndex = currentDate.day - 1;
+    final offset = currentDayIndex * dayWidth;
+
+    // Animate to the calculated position
+    _scrollController.animateTo(
+      offset,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,11 +81,12 @@ class _DailyStreakWidgetState extends State<DailyStreakWidget> {
         ),
         Gap.low,
         SingleChildScrollView(
+          controller: _scrollController,
           physics: const PageScrollPhysics(),
           scrollDirection: Axis.horizontal,
           child: Row(
             children: List.generate(
-              endDate.day, // Use total days in current month
+              endDate.day,
               (index) {
                 DateTime date = startDate.add(Duration(days: index));
                 bool isCompleted = date.isBefore(DateTime.now());

@@ -14,8 +14,8 @@ class MainPage extends StatelessWidget {
       backgroundColor: Colors.transparent,
       routes: const [
         HomeRoute(),
-        HabitListRoute(),
-        HabitCreationRoute(),
+        HabitRecommendationRoute(),
+        StatsRoute(),
         SettingsRoute(),
       ],
       bottomNavigationBuilder: (context, tabsRouter) {
@@ -84,12 +84,7 @@ class MainPage extends StatelessWidget {
                 right: 0,
                 child: GestureDetector(
                   onTap: () {
-                  context.router.push(HabitCreationRoute()).then((_) {
-                    // Reset to home tab after returning from habit creation
-                    if (tabsRouter.activeIndex != 0) {
-                      tabsRouter.setActiveIndex(0);
-                    }
-                  });
+                    context.pushRoute(const HabitCreationRoute());
                   },
                   child: Container(
                     width: 60,

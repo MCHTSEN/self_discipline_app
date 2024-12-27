@@ -57,7 +57,7 @@ class HomePageState extends ConsumerState<HomePage> {
                         Text('Today\'s Tasks',
                             style: Theme.of(context).textTheme.labelLarge),
                         Gap.low,
-                        _buildHabitsSection(habitListState),
+                        _buildHabitsSection(habitListState)
                       ],
                     ),
                   ),

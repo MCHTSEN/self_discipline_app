@@ -14,7 +14,7 @@ class AppInitializer {
     // Initialize Hive
     await Hive.initFlutter();
 
-    // Clear old data (only needed once during migration)
+    // Clear old data
     await Hive.deleteBoxFromDisk('habits');
     await Hive.deleteBoxFromDisk('habit_completions');
     await Hive.deleteBoxFromDisk('settings');
