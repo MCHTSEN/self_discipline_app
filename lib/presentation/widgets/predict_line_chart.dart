@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:self_discipline_app/core/theme/app_colors.dart';
 import 'package:self_discipline_app/presentation/widgets/line_chart.dart';
 
 class LineChartSample5 extends StatefulWidget {
@@ -7,17 +8,14 @@ class LineChartSample5 extends StatefulWidget {
     super.key,
     Color? gradientColor1,
     Color? gradientColor2,
-    Color? gradientColor3,
     Color? indicatorStrokeColor,
   })  : gradientColor1 = gradientColor1 ?? ChartColors.contentColorBlue,
         gradientColor2 = gradientColor2 ?? Colors.grey,
-        gradientColor3 = gradientColor3 ?? Colors.grey,
         indicatorStrokeColor =
             indicatorStrokeColor ?? ChartColors.mainTextColor1;
 
   final Color gradientColor1;
   final Color gradientColor2;
-  final Color gradientColor3;
   final Color indicatorStrokeColor;
 
   @override
@@ -25,69 +23,81 @@ class LineChartSample5 extends StatefulWidget {
 }
 
 class _LineChartSample5State extends State<LineChartSample5> {
-  List<int> showingTooltipOnSpots = [1, 3, 5];
-
   List<FlSpot> get allSpots => const [
         FlSpot(0, 1),
         FlSpot(1, 2),
-        FlSpot(2, 1.5),
+        FlSpot(2, 6),
         FlSpot(3, 3),
         FlSpot(4, 3.5),
         FlSpot(5, 5),
         FlSpot(6, 8),
+        FlSpot(7, 4),
+        FlSpot(8, 5),
+        FlSpot(9, 6),
+        FlSpot(10, 7),
+        FlSpot(11, 9),
       ];
 
   Widget bottomTitleWidgets(double value, TitleMeta meta, double chartWidth) {
+    final currentMonth = DateTime.now().month - 1; // 0-based index for months
     final style = TextStyle(
       fontWeight: FontWeight.bold,
-      color: ChartColors.contentColorPink,
+      color: Colors.black,
       fontFamily: 'Digital',
       fontSize: 18 * chartWidth / 500,
     );
-    
-    String text;
-    switch (value.toInt()) {
-      case 0:
-        text = 'Jn';
-        break;
-      case 1:
-        text = 'Jn';
-        break;
-      case 2:
-        text = 'Jn';
-        break;
-      case 3:
-        text = 'Jn';
-        break;
-      case 4:
-        text = 'Jn';
-        break;
-      case 5:
-        text = 'Jn';
-        break;
-      case 6:
-        text = 'Jn';
-        break;
-      default:
-        return Container();
+
+    final monthIndex = value.toInt();
+
+    // Only show text for January (0), December (11), and current month
+    if (monthIndex == 0) {
+      return SideTitleWidget(
+        axisSide: meta.axisSide,
+        child: Text('Jan', style: style),
+      );
+    } else if (monthIndex == currentMonth) {
+      final months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+      ];
+      return SideTitleWidget(
+        axisSide: meta.axisSide,
+        child: Text(months[currentMonth], style: style),
+      );
+    } else if (monthIndex == 11) {
+      return SideTitleWidget(
+        axisSide: meta.axisSide,
+        child: Text('Dec', style: style),
+      );
     }
 
-    return SideTitleWidget(
-      axisSide: meta.axisSide,
-      child: Text(text, style: style),
-    );
+    return Container();
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentMonth = DateTime.now().month - 1; // 0-based index for months
+    final stopAtCurrentMonth = currentMonth / 11; // Convert to 0-1 range
+    final transitionStop =
+        stopAtCurrentMonth + 0.05; // Slightly after current month
+
     final lineBarsData = [
       LineChartBarData(
-        showingIndicators: showingTooltipOnSpots,
         spots: allSpots,
         isCurved: true,
         barWidth: 4,
         shadow: const Shadow(
-          blurRadius: 8,
+          blurRadius: 1,
         ),
         belowBarData: BarAreaData(
           show: true,
@@ -95,26 +105,25 @@ class _LineChartSample5State extends State<LineChartSample5> {
             colors: [
               widget.gradientColor1.withOpacity(0.4),
               widget.gradientColor2.withOpacity(0.4),
-              widget.gradientColor3.withOpacity(0.4),
+              widget.gradientColor2.withOpacity(0.4),
             ],
+            stops: [stopAtCurrentMonth, transitionStop, transitionStop],
           ),
         ),
         dotData: const FlDotData(show: false),
         gradient: LinearGradient(
           colors: [
             widget.gradientColor1,
+            widget.gradientColor1,
             widget.gradientColor2,
-            widget.gradientColor3,
           ],
-          stops: const [0.1, 0.2, 0.9],
+          stops: [stopAtCurrentMonth, transitionStop, transitionStop],
         ),
       ),
     ];
 
-    final tooltipsOnBar = lineBarsData[0];
-
     return AspectRatio(
-      aspectRatio: 2.5,
+      aspectRatio: 2,
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 24.0,
@@ -123,34 +132,9 @@ class _LineChartSample5State extends State<LineChartSample5> {
         child: LayoutBuilder(builder: (context, constraints) {
           return LineChart(
             LineChartData(
-              showingTooltipIndicators: showingTooltipOnSpots.map((index) {
-                return ShowingTooltipIndicators([
-                  LineBarSpot(
-                    tooltipsOnBar,
-                    lineBarsData.indexOf(tooltipsOnBar),
-                    tooltipsOnBar.spots[index],
-                  ),
-                ]);
-              }).toList(),
               lineTouchData: LineTouchData(
                 enabled: true,
                 handleBuiltInTouches: false,
-                touchCallback:
-                    (FlTouchEvent event, LineTouchResponse? response) {
-                  if (response == null || response.lineBarSpots == null) {
-                    return;
-                  }
-                  if (event is FlTapUpEvent) {
-                    final spotIndex = response.lineBarSpots!.first.spotIndex;
-                    setState(() {
-                      if (showingTooltipOnSpots.contains(spotIndex)) {
-                        showingTooltipOnSpots.remove(spotIndex);
-                      } else {
-                        showingTooltipOnSpots.add(spotIndex);
-                      }
-                    });
-                  }
-                },
                 mouseCursorResolver:
                     (FlTouchEvent event, LineTouchResponse? response) {
                   if (response == null || response.lineBarSpots == null) {

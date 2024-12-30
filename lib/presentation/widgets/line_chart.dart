@@ -1,6 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'dart:math';
 
 class LineChartSample3 extends StatefulWidget {
   LineChartSample3({
