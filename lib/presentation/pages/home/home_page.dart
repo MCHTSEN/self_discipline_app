@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:self_discipline_app/core/constants/paddings.dart';
 import 'package:self_discipline_app/core/helper/gap.dart';
+import 'package:self_discipline_app/core/theme/app_colors.dart';
 import 'package:self_discipline_app/presentation/pages/home/components/header_section.dart';
 import 'package:self_discipline_app/presentation/pages/home/components/weekly_streak_widget.dart';
 import 'package:self_discipline_app/presentation/viewmodels/habit_list_notifier.dart';
@@ -46,19 +47,36 @@ class HomePageState extends ConsumerState<HomePage> {
                 Gap.normal,
                 const DailyStreakWidget(),
                 Gap.normal,
+                const LineChartSample5(),
+                Gap.normal,
                 Expanded(
-                  child: Padding(
-                    padding: ProjectPaddingType
-                        .defaultPadding.symmetricHorizontalPadding,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const LineChartSample5(),
-                        Text('Today\'s Tasks',
-                            style: Theme.of(context).textTheme.labelLarge),
-                        Gap.low,
-                        _buildHabitsSection(habitListState)
-                      ],
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: AppSecondaryColors.liquidLava.withOpacity(0.1),
+                        borderRadius:
+                            ProjectRadiusType.extraLargeRadius.allRadius),
+                    child: Padding(
+                      padding: ProjectPaddingType.defaultPadding.allPadding,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text('🌟 Today\'s Tasks (4/6)',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall!
+                                      .copyWith(fontSize: 16)),
+                              Gap.normal,
+                              Expanded(
+                                  child:
+                                      Container(height: 2, color: Colors.grey))
+                            ],
+                          ),
+                          Gap.low,
+                          _buildHabitsSection(habitListState)
+                        ],
+                      ),
                     ),
                   ),
                 ),

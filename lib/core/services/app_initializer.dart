@@ -14,11 +14,6 @@ class AppInitializer {
     // Initialize Hive
     await Hive.initFlutter();
 
-    // Clear old data
-    await Hive.deleteBoxFromDisk('habits');
-    await Hive.deleteBoxFromDisk('habit_completions');
-    await Hive.deleteBoxFromDisk('settings');
-
     // Register Adapters
     Hive.registerAdapter(HabitModelAdapter());
 
@@ -47,12 +42,11 @@ class AppInitializer {
       completionBoxProvider.overrideWithValue(completionBox),
     ];
   }
-
   static Widget wrapWithProviders(Widget app, List<Override> overrides) {
     return ProviderScope(
       overrides: overrides,
       child: DevicePreview(
-        enabled: !kReleaseMode,
+        enabled: false,
         builder: (context) => app,
       ),
     );

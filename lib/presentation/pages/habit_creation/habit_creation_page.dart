@@ -4,12 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:self_discipline_app/core/helper/keyboard_unfocus.dart';
-import 'package:self_discipline_app/core/theme/app_colors.dart';
-import 'package:self_discipline_app/core/utils/logger.dart';
 import 'package:self_discipline_app/domain/entities/habit_entity.dart';
 import 'package:self_discipline_app/presentation/viewmodels/create_habit_notifier.dart';
 import 'package:self_discipline_app/presentation/viewmodels/habit_list_notifier.dart';
-import 'package:self_discipline_app/presentation/widgets/habit_icon_selector.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 
