@@ -19,7 +19,7 @@ class _DailyStreakWidgetState extends State<DailyStreakWidget> {
 
   // Get first and last day of current month
   DateTime get startDate => DateTime(currentDate.year, currentDate.month, 1);
-  DateTime get endDate => DateTime(currentDate.year, currentDate.month, 0);
+  DateTime get endDate => DateTime(currentDate.year, currentDate.month + 1, 0);
   String get _currentDate => DateFormat('MMMM').format(currentDate);
 
   @override
