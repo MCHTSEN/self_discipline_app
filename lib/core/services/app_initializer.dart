@@ -12,12 +12,28 @@ class AppInitializer {
     WidgetsFlutterBinding.ensureInitialized();
     await Hive.initFlutter();
 
-    // Adapterleri kaydet
+    // Register adapters
     Hive.registerAdapter(HabitModelAdapter());
 
-    // Kutuları aç
-    final habitBox = await Hive.openBox<HabitModel>('habits');
-    final settingsBox = await Hive.openBox('settings');
+    // Open boxes with error handling
+    Box<HabitModel> habitBox;
+    Box settingsBox;
+
+    try {
+      habitBox = await Hive.openBox<HabitModel>('habits');
+    } catch (e) {
+      // If there's an error, delete the box and try again
+      await Hive.deleteBoxFromDisk('habits');
+      habitBox = await Hive.openBox<HabitModel>('habits');
+    }
+
+    try {
+      settingsBox = await Hive.openBox('settings');
+    } catch (e) {
+      // If there's an error, delete the box and try again
+      await Hive.deleteBoxFromDisk('settings');
+      settingsBox = await Hive.openBox('settings');
+    }
 
     // Set preferred orientations
     await SystemChrome.setPreferredOrientations([
