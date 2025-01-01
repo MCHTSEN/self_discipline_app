@@ -6,13 +6,15 @@ import 'package:self_discipline_app/domain/entities/habit_entity.dart';
 class HabitWidget extends StatelessWidget {
   final HabitEntity habit;
   final VoidCallback onComplete;
+  final VoidCallback onUncomplete;
   final bool isCompleted;
 
   const HabitWidget({
     super.key,
     required this.habit,
     required this.onComplete,
-    this.isCompleted = false,
+    required this.onUncomplete,
+    required this.isCompleted,
   });
 
   @override
@@ -33,6 +35,7 @@ class HabitWidget extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Gap.extraLow,
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -51,7 +54,7 @@ class HabitWidget extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  '🔥  5 gün',
+                  '🔥 ${habit.currentStreak} gün',
                   style: Theme.of(context)
                       .textTheme
                       .bodySmall!
@@ -61,13 +64,13 @@ class HabitWidget extends StatelessWidget {
             )
           ],
         ),
-        trailing: isCompleted
-            ? const Icon(Icons.check_circle,
-                color: AppSecondaryColors.dustyGrey)
-            : IconButton(
-                icon: const Icon(Icons.check_circle_outline),
-                onPressed: onComplete,
-              ),
+        trailing: IconButton(
+          icon: Icon(
+            isCompleted ? Icons.check_circle : Icons.check_circle_outline,
+            color: isCompleted ? AppSecondaryColors.dustyGrey : null,
+          ),
+          onPressed: isCompleted ? onUncomplete : onComplete,
+        ),
       ),
     );
   }

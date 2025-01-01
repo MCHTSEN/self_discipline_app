@@ -33,16 +33,13 @@ class HabitModel extends HiveObject {
   final int difficulty;
 
   @HiveField(9)
-  final DateTime? lastCompletedAt;
+  final List<DateTime> completions;
 
   @HiveField(10)
   final int currentStreak;
 
   @HiveField(11)
   final int bestStreak;
-
-  @HiveField(12)
-  final List<DateTime> completions;
 
   HabitModel({
     required this.id,
@@ -54,10 +51,9 @@ class HabitModel extends HiveObject {
     this.customDays,
     this.notificationTime,
     required this.difficulty,
-    this.lastCompletedAt,
+    this.completions = const [],
     this.currentStreak = 0,
     this.bestStreak = 0,
-    this.completions = const [],
   });
 
   factory HabitModel.fromEntity(HabitEntity entity) {
@@ -71,10 +67,9 @@ class HabitModel extends HiveObject {
       customDays: entity.customDays,
       notificationTime: entity.notificationTime,
       difficulty: entity.difficulty,
-      lastCompletedAt: entity.lastCompletedAt,
+      completions: entity.completions,
       currentStreak: entity.currentStreak,
       bestStreak: entity.bestStreak,
-      completions: entity.completions,
     );
   }
 
@@ -89,10 +84,9 @@ class HabitModel extends HiveObject {
       customDays: customDays,
       notificationTime: notificationTime,
       difficulty: difficulty,
-      lastCompletedAt: lastCompletedAt,
+      completions: completions,
       currentStreak: currentStreak,
       bestStreak: bestStreak,
-      completions: completions,
     );
   }
 }

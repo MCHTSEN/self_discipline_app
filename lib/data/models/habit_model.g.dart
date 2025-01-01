@@ -26,17 +26,16 @@ class HabitModelAdapter extends TypeAdapter<HabitModel> {
       customDays: (fields[6] as List?)?.cast<int>(),
       notificationTime: fields[7] as DateTime?,
       difficulty: fields[8] as int,
-      lastCompletedAt: fields[9] as DateTime?,
+      completions: (fields[9] as List?)?.cast<DateTime>() ?? [],
       currentStreak: fields[10] as int,
       bestStreak: fields[11] as int,
-      completions: (fields[12] as List).cast<DateTime>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, HabitModel obj) {
     writer
-      ..writeByte(13)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -56,13 +55,11 @@ class HabitModelAdapter extends TypeAdapter<HabitModel> {
       ..writeByte(8)
       ..write(obj.difficulty)
       ..writeByte(9)
-      ..write(obj.lastCompletedAt)
+      ..write(obj.completions)
       ..writeByte(10)
       ..write(obj.currentStreak)
       ..writeByte(11)
-      ..write(obj.bestStreak)
-      ..writeByte(12)
-      ..write(obj.completions);
+      ..write(obj.bestStreak);
   }
 
   @override

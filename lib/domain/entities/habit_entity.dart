@@ -8,10 +8,20 @@ class HabitEntity {
   final List<int>? customDays;
   final DateTime? notificationTime;
   final int difficulty;
-  final DateTime? lastCompletedAt;
+  final List<DateTime> completions; // Tüm tamamlanma tarihlerini tutar
   final int currentStreak;
   final int bestStreak;
-  final List<DateTime> completions;
+
+  bool get isCompletedToday {
+    final now = DateTime.now();
+    return completions.any((date) =>
+        date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day);
+  }
+
+  DateTime? get lastCompletedAt =>
+      completions.isNotEmpty ? completions.last : null;
 
   const HabitEntity({
     required this.id,
@@ -23,10 +33,9 @@ class HabitEntity {
     this.customDays,
     this.notificationTime,
     required this.difficulty,
-    this.lastCompletedAt,
+    this.completions = const [],
     this.currentStreak = 0,
     this.bestStreak = 0,
-    this.completions = const [],
   });
 
   HabitEntity copyWith({
@@ -38,10 +47,9 @@ class HabitEntity {
     List<int>? customDays,
     DateTime? notificationTime,
     int? difficulty,
-    DateTime? lastCompletedAt,
+    List<DateTime>? completions,
     int? currentStreak,
     int? bestStreak,
-    List<DateTime>? completions,
   }) {
     return HabitEntity(
       id: id,
@@ -53,10 +61,9 @@ class HabitEntity {
       customDays: customDays ?? this.customDays,
       notificationTime: notificationTime ?? this.notificationTime,
       difficulty: difficulty ?? this.difficulty,
-      lastCompletedAt: lastCompletedAt ?? this.lastCompletedAt,
+      completions: completions ?? this.completions,
       currentStreak: currentStreak ?? this.currentStreak,
       bestStreak: bestStreak ?? this.bestStreak,
-      completions: completions ?? this.completions,
     );
   }
 }

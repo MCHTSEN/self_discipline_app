@@ -33,11 +33,9 @@ class HeaderSection extends ConsumerWidget {
 
   Future<void> _clearCache(BuildContext context, WidgetRef ref) async {
     final habitBox = ref.read(habitBoxProvider);
-    final completionBox = ref.read(completionBoxProvider);
-    final settingsBox = ref.read(settingsProvider.notifier).settingsBox;
+    final settingsBox = ref.read(settingsBoxProvider);
 
     await habitBox.clear();
-    await completionBox.clear();
     await settingsBox.clear();
 
     if (context.mounted) {
