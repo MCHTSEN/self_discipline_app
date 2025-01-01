@@ -3,51 +3,50 @@ import 'package:hive/hive.dart';
 import 'package:self_discipline_app/data/datasources/habit_local_data_source.dart';
 import 'package:self_discipline_app/data/models/habit_model.dart';
 import 'package:self_discipline_app/data/repositories/habit_repository_impl.dart';
+import 'package:self_discipline_app/domain/repositories/habit_repository.dart';
 import 'package:self_discipline_app/domain/usecases/create_habit_usecase.dart';
 import 'package:self_discipline_app/domain/usecases/delete_habit_usecase.dart';
 import 'package:self_discipline_app/domain/usecases/get_habits_usecase.dart';
 import 'package:self_discipline_app/domain/usecases/update_habit_usecase.dart';
-import 'package:self_discipline_app/presentation/viewmodels/settings_notifier.dart';
 
+// Hive Boxes
 final habitBoxProvider = Provider<Box<HabitModel>>((ref) {
-  throw UnimplementedError();
+  throw UnimplementedError('habitBoxProvider not initialized');
 });
 
-final settingBoxProvider = Provider<Box<AppSettings>>((ref) {
-  throw UnimplementedError();
+final settingsProvider = StateProvider<Box>((ref) {
+  throw UnimplementedError('settingsProvider not initialized');
 });
 
-final completionBoxProvider = Provider<Box<List<DateTime>>>((ref) {
-  throw UnimplementedError();
-});
-
+// Data Sources
 final habitLocalDataSourceProvider = Provider<HabitLocalDataSource>((ref) {
   final habitBox = ref.watch(habitBoxProvider);
-  final completionBox = ref.watch(completionBoxProvider);
-  return HabitLocalDataSourceImpl(habitBox, completionBox);
+  return HabitLocalDataSourceImpl(habitBox);
 });
 
-final habitRepositoryProvider = Provider((ref) {
-  final localDS = ref.watch(habitLocalDataSourceProvider);
-  return HabitRepositoryImpl(localDS);
+// Repositories
+final habitRepositoryProvider = Provider<HabitRepository>((ref) {
+  final localDataSource = ref.watch(habitLocalDataSourceProvider);
+  return HabitRepositoryImpl(localDataSource);
 });
 
-final getHabitsUseCaseProvider = Provider((ref) {
-  final repo = ref.watch(habitRepositoryProvider);
-  return GetHabitsUseCase(repo);
+// Use Cases
+final getHabitsUseCaseProvider = Provider<GetHabitsUseCase>((ref) {
+  final repository = ref.watch(habitRepositoryProvider);
+  return GetHabitsUseCase(repository);
 });
 
-final createHabitUseCaseProvider = Provider((ref) {
-  final repo = ref.watch(habitRepositoryProvider);
-  return CreateHabitUseCase(repo);
+final createHabitUseCaseProvider = Provider<CreateHabitUseCase>((ref) {
+  final repository = ref.watch(habitRepositoryProvider);
+  return CreateHabitUseCase(repository);
 });
 
 final updateHabitUseCaseProvider = Provider<UpdateHabitUseCase>((ref) {
-  final repo = ref.watch(habitRepositoryProvider);
-  return UpdateHabitUseCase(repo);
+  final repository = ref.watch(habitRepositoryProvider);
+  return UpdateHabitUseCase(repository);
 });
 
 final deleteHabitUseCaseProvider = Provider<DeleteHabitUseCase>((ref) {
-  final repo = ref.watch(habitRepositoryProvider);
-  return DeleteHabitUseCase(repo);
+  final repository = ref.watch(habitRepositoryProvider);
+  return DeleteHabitUseCase(repository);
 });

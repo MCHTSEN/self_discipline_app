@@ -1,5 +1,4 @@
 import 'package:self_discipline_app/data/datasources/habit_local_data_source.dart';
-import 'package:self_discipline_app/data/models/habit_model.dart';
 import 'package:self_discipline_app/domain/entities/habit_entity.dart';
 import 'package:self_discipline_app/domain/repositories/habit_repository.dart';
 
@@ -9,35 +8,41 @@ class HabitRepositoryImpl implements HabitRepository {
   HabitRepositoryImpl(this.localDataSource);
 
   @override
-  Future<void> createHabit(HabitEntity habit) {
-    final model = HabitModel.fromEntity(habit);
-    return localDataSource.createHabit(model);
+  Future<void> createHabit(HabitEntity habit) async {
+    await localDataSource.createHabit(habit);
   }
 
   @override
   Future<List<HabitEntity>> getHabits() async {
-    final models = await localDataSource.getHabits();
-    return models.map((m) => m.toEntity()).toList();
+    return await localDataSource.getHabits();
   }
 
   @override
-  Future<void> updateHabit(HabitEntity habit) {
-    final model = HabitModel.fromEntity(habit);
-    return localDataSource.updateHabit(model);
+  Future<void> updateHabit(HabitEntity habit) async {
+    await localDataSource.updateHabit(habit);
   }
 
   @override
-  Future<void> deleteHabit(String habitId) {
-    return localDataSource.deleteHabit(habitId);
+  Future<void> deleteHabit(String habitId) async {
+    await localDataSource.deleteHabit(habitId);
   }
 
   @override
-  Future<void> markHabitCompleted(String habitId, DateTime date) {
-    return localDataSource.markHabitCompleted(habitId, date);
+  Future<void> markHabitCompleted(String habitId, DateTime date) async {
+    final habits = await getHabits();
+    final habit = habits.firstWhere((h) => h.id == habitId);
+
+    final updatedHabit = habit.copyWith(
+      completions: [...habit.completions, date],
+    );
+
+    await updateHabit(updatedHabit);
   }
 
   @override
-  Future<List<DateTime>> getHabitCompletionDates(String habitId) {
-    return localDataSource.getHabitCompletionDates(habitId);
+  Future<List<DateTime>> getHabitCompletionDates(String habitId) async {
+    final habits = await getHabits();
+    final habit = habits.firstWhere((h) => h.id == habitId);
+    return habit.completions;
   }
 }

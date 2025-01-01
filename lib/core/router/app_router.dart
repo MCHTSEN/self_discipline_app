@@ -1,11 +1,11 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
-import 'package:self_discipline_app/presentation/pages/habit_creation_page.dart';
+import 'package:self_discipline_app/presentation/pages/habit_creation/habit_creation_page.dart';
 import 'package:self_discipline_app/presentation/pages/home/home_page.dart';
-import 'package:self_discipline_app/presentation/pages/habit_list_page.dart';
 import 'package:self_discipline_app/presentation/pages/main/main_page.dart';
-import 'package:self_discipline_app/core/router/route_transitions.dart';
 import 'package:self_discipline_app/presentation/pages/settings/settings_page.dart';
+import 'package:self_discipline_app/presentation/pages/stats/stats_page.dart';
+import 'package:self_discipline_app/presentation/pages/habit_recommendation/habit_recommendation_page.dart';
+import 'package:self_discipline_app/core/router/route_transitions.dart';
 
 part 'app_router.gr.dart';
 
@@ -16,48 +16,18 @@ class AppRouter extends _$AppRouter {
         CustomRoute(
           page: MainRoute.page,
           initial: true,
-          transitionsBuilder: TransitionsBuilders.fadeIn,
           children: [
             CustomRoute(
               page: HomeRoute.page,
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                return SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(1.0, 0.0),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeInOut,
-                  )),
-                  child: child,
-                );
-              },
+              transitionsBuilder: RouteTransitions.slideTransition,
             ),
             CustomRoute(
-              page: HabitListRoute.page,
+              page: StatsRoute.page,
+              transitionsBuilder: RouteTransitions.fadeSlideTransition,
+            ),
+            CustomRoute(
+              page: HabitRecommendationRoute.page,
               transitionsBuilder: RouteTransitions.scaleTransition,
-            ),
-            CustomRoute(
-              page: HabitCreationRoute.page,
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0.0, 1.0),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeInOut,
-                    )),
-                    child: child,
-                  ),
-                );
-              },
-              durationInMilliseconds: 400,
-              reverseDurationInMilliseconds: 400,
             ),
             CustomRoute(
               page: SettingsRoute.page,
@@ -65,5 +35,6 @@ class AppRouter extends _$AppRouter {
             ),
           ],
         ),
+        CustomRoute(page: HabitCreationRoute.page),
       ];
 }

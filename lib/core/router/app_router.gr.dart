@@ -21,10 +21,10 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const HabitCreationPage(),
       );
     },
-    HabitListRoute.name: (routeData) {
+    HabitRecommendationRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const HabitListPage(),
+        child: const HabitRecommendationPage(),
       );
     },
     HomeRoute.name: (routeData) {
@@ -45,6 +45,12 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const SettingsPage(),
       );
     },
+    StatsRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const StatsPage(),
+      );
+    },
   };
 }
 
@@ -63,15 +69,15 @@ class HabitCreationRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [HabitListPage]
-class HabitListRoute extends PageRouteInfo<void> {
-  const HabitListRoute({List<PageRouteInfo>? children})
+/// [HabitRecommendationPage]
+class HabitRecommendationRoute extends PageRouteInfo<void> {
+  const HabitRecommendationRoute({List<PageRouteInfo>? children})
       : super(
-          HabitListRoute.name,
+          HabitRecommendationRoute.name,
           initialChildren: children,
         );
 
-  static const String name = 'HabitListRoute';
+  static const String name = 'HabitRecommendationRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }
@@ -114,6 +120,20 @@ class SettingsRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'SettingsRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [StatsPage]
+class StatsRoute extends PageRouteInfo<void> {
+  const StatsRoute({List<PageRouteInfo>? children})
+      : super(
+          StatsRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'StatsRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

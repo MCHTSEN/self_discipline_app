@@ -10,9 +10,11 @@ class HabitCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(habit.title),
-      subtitle: Text('Target: ${habit.targetAmount} - ${habit.frequency}'),
+      subtitle: Text(
+        'Target: ${habit.targetValue}${habit.targetType == 'duration' ? ' min' : ' times'} | ${habit.frequency}',
+      ),
       onTap: () {
-        // Detay sayfasına gidebilirsiniz
+        // Navigate to detail page
       },
     );
   }

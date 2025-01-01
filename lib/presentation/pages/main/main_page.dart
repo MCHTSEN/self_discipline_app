@@ -1,9 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:self_discipline_app/core/helper/gap.dart';
 import 'package:self_discipline_app/core/router/app_router.dart';
 import 'package:self_discipline_app/core/utils/logger.dart';
-import 'package:self_discipline_app/presentation/pages/habit_creation_page.dart';
 
 @RoutePage()
 class MainPage extends StatelessWidget {
@@ -16,8 +14,8 @@ class MainPage extends StatelessWidget {
       backgroundColor: Colors.transparent,
       routes: const [
         HomeRoute(),
-        HabitListRoute(),
-        HabitCreationRoute(),
+        HabitRecommendationRoute(),
+        StatsRoute(),
         SettingsRoute(),
       ],
       bottomNavigationBuilder: (context, tabsRouter) {
@@ -86,11 +84,7 @@ class MainPage extends StatelessWidget {
                 right: 0,
                 child: GestureDetector(
                   onTap: () {
-                    // Show habit creation dialog or navigate
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (context) => const HabitCreationPage(),
-                    );
+                    context.pushRoute(const HabitCreationRoute());
                   },
                   child: Container(
                     width: 60,

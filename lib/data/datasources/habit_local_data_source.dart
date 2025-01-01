@@ -1,50 +1,38 @@
 import 'package:hive/hive.dart';
 import 'package:self_discipline_app/data/models/habit_model.dart';
+import 'package:self_discipline_app/domain/entities/habit_entity.dart';
 
 abstract class HabitLocalDataSource {
-  Future<void> createHabit(HabitModel habit);
-  Future<List<HabitModel>> getHabits();
-  Future<void> updateHabit(HabitModel habit);
+  Future<List<HabitEntity>> getHabits();
+  Future<void> createHabit(HabitEntity habit);
+  Future<void> updateHabit(HabitEntity habit);
   Future<void> deleteHabit(String habitId);
-  Future<void> markHabitCompleted(String habitId, DateTime date);
-  Future<List<DateTime>> getHabitCompletionDates(String habitId);
 }
 
 class HabitLocalDataSourceImpl implements HabitLocalDataSource {
   final Box<HabitModel> habitBox;
-  final Box<List<DateTime>> completionBox;
 
-  HabitLocalDataSourceImpl(this.habitBox, this.completionBox);
+  HabitLocalDataSourceImpl(this.habitBox);
 
   @override
-  Future<void> createHabit(HabitModel habit) async {
-    await habitBox.put(habit.id, habit);
+  Future<List<HabitEntity>> getHabits() async {
+    return habitBox.values.map((model) => model.toEntity()).toList();
   }
 
   @override
-  Future<List<HabitModel>> getHabits() async {
-    return habitBox.values.toList();
+  Future<void> createHabit(HabitEntity habit) async {
+    final habitModel = HabitModel.fromEntity(habit);
+    await habitBox.put(habit.id, habitModel);
   }
 
   @override
-  Future<void> updateHabit(HabitModel habit) async {
-    await habit.save();
+  Future<void> updateHabit(HabitEntity habit) async {
+    final habitModel = HabitModel.fromEntity(habit);
+    await habitBox.put(habit.id, habitModel);
   }
 
   @override
   Future<void> deleteHabit(String habitId) async {
     await habitBox.delete(habitId);
-  }
-
-  @override
-  Future<void> markHabitCompleted(String habitId, DateTime date) async {
-    final completions = completionBox.get(habitId) ?? [];
-    completions.add(date);
-    await completionBox.put(habitId, completions);
-  }
-
-  @override
-  Future<List<DateTime>> getHabitCompletionDates(String habitId) async {
-    return completionBox.get(habitId) ?? [];
   }
 }

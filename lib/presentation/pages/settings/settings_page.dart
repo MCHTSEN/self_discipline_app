@@ -16,7 +16,7 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Logger.pageBuild('SettingsPage');
-    final settings = ref.watch(settingsProvider);
+    final settings = ref.watch(appSettingsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -58,9 +58,12 @@ class SettingsPage extends ConsumerWidget {
           title: const Text('Notifications'),
           subtitle: const Text('Daily reminders and alerts'),
           secondary: const Icon(Icons.notifications_outlined),
-          value: settings.enableNotifications,
-          onChanged: (value) =>
-              ref.read(settingsProvider.notifier).updateNotifications(value),
+          value: settings.isNotificationsEnabled,
+          onChanged: (value) async {
+            await ref
+                .read(appSettingsProvider.notifier)
+                .setNotificationsEnabled(value);
+          },
         ),
       ],
     );
@@ -73,11 +76,11 @@ class SettingsPage extends ConsumerWidget {
         ListTile(
           title: const Text('Contact Us'),
           leading: const Icon(Icons.mail_outline),
-          onTap: () => _launchURL('mailto:${settings.contactEmail}'),
+          onTap: () => _launchURL('mailto:support@example.com'),
         ),
         ListTile(
           title: const Text('About App'),
-          subtitle: Text('Version ${settings.appVersion}'),
+          subtitle: const Text('Version 1.0.0'),
           leading: const Icon(Icons.info_outline),
           onTap: () => _showAboutDialog(context),
         ),
@@ -91,18 +94,22 @@ class SettingsPage extends ConsumerWidget {
   }
 
   Widget _buildLegalSection(BuildContext context, AppSettings settings) {
+    const String defaultPrivacyPolicy =
+        'https://enshrined-xylophone-794.notion.site/Privacy-Policy-1684dd6a6c7380d0b48afeadf1266019';
+    const String defaultTermsOfService =
+        'https://enshrined-xylophone-794.notion.site/Terms-of-Service-1684dd6a6c7380b2ae91fb917e6bf321';
     return _buildSection(
       'Legal',
       [
         ListTile(
           title: const Text('Privacy Policy'),
           leading: const Icon(Icons.privacy_tip_outlined),
-          onTap: () => _launchURL(settings.privacyPolicyUrl),
+          onTap: () => _launchURL(defaultPrivacyPolicy),
         ),
         ListTile(
           title: const Text('Terms of Service'),
           leading: const Icon(Icons.description_outlined),
-          onTap: () => _launchURL(settings.termsOfServiceUrl),
+          onTap: () => _launchURL(defaultTermsOfService),
         ),
       ],
     );
@@ -150,11 +157,13 @@ class SettingsPage extends ConsumerWidget {
           title: const Text('Select Theme'),
           actions: [
             CupertinoActionSheetAction(
-              onPressed: () {
-                ref
-                    .read(settingsProvider.notifier)
-                    .updateThemeMode(ThemeMode.system);
-                Navigator.pop(context);
+              onPressed: () async {
+                await ref
+                    .read(appSettingsProvider.notifier)
+                    .setThemeMode(ThemeMode.system);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
               },
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -166,11 +175,13 @@ class SettingsPage extends ConsumerWidget {
               ),
             ),
             CupertinoActionSheetAction(
-              onPressed: () {
-                ref
-                    .read(settingsProvider.notifier)
-                    .updateThemeMode(ThemeMode.light);
-                Navigator.pop(context);
+              onPressed: () async {
+                await ref
+                    .read(appSettingsProvider.notifier)
+                    .setThemeMode(ThemeMode.light);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
               },
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -182,11 +193,13 @@ class SettingsPage extends ConsumerWidget {
               ),
             ),
             CupertinoActionSheetAction(
-              onPressed: () {
-                ref
-                    .read(settingsProvider.notifier)
-                    .updateThemeMode(ThemeMode.dark);
-                Navigator.pop(context);
+              onPressed: () async {
+                await ref
+                    .read(appSettingsProvider.notifier)
+                    .setThemeMode(ThemeMode.dark);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
               },
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -214,31 +227,37 @@ class SettingsPage extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.brightness_auto),
               title: const Text('System Default'),
-              onTap: () {
-                ref
-                    .read(settingsProvider.notifier)
-                    .updateThemeMode(ThemeMode.system);
-                Navigator.pop(context);
+              onTap: () async {
+                await ref
+                    .read(appSettingsProvider.notifier)
+                    .setThemeMode(ThemeMode.system);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
               },
             ),
             ListTile(
               leading: const Icon(Icons.brightness_5),
               title: const Text('Light'),
-              onTap: () {
-                ref
-                    .read(settingsProvider.notifier)
-                    .updateThemeMode(ThemeMode.light);
-                Navigator.pop(context);
+              onTap: () async {
+                await ref
+                    .read(appSettingsProvider.notifier)
+                    .setThemeMode(ThemeMode.light);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
               },
             ),
             ListTile(
               leading: const Icon(Icons.brightness_4),
               title: const Text('Dark'),
-              onTap: () {
-                ref
-                    .read(settingsProvider.notifier)
-                    .updateThemeMode(ThemeMode.dark);
-                Navigator.pop(context);
+              onTap: () async {
+                await ref
+                    .read(appSettingsProvider.notifier)
+                    .setThemeMode(ThemeMode.dark);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
               },
             ),
           ],
@@ -334,7 +353,7 @@ class SettingsPage extends ConsumerWidget {
         builder: (context) => CupertinoAlertDialog(
           title: const Text('Clear All Data'),
           content: const Text(
-            'This will delete all your habits, completions, and settings. '
+            'This will delete all your habits and settings. '
             'This action cannot be undone. Are you sure?',
           ),
           actions: [
@@ -359,7 +378,7 @@ class SettingsPage extends ConsumerWidget {
             builder: (context) => AlertDialog(
               title: const Text('Clear All Data'),
               content: const Text(
-                'This will delete all your habits, completions, and settings. '
+                'This will delete all your habits and settings. '
                 'This action cannot be undone. Are you sure?',
               ),
               actions: [
@@ -382,11 +401,9 @@ class SettingsPage extends ConsumerWidget {
 
     if (shouldClear && context.mounted) {
       final habitBox = ref.read(habitBoxProvider);
-      final completionBox = ref.read(completionBoxProvider);
-      final settingsBox = ref.read(settingsProvider.notifier).settingsBox;
+      final settingsBox = ref.read(settingsBoxProvider);
 
       await habitBox.clear();
-      await completionBox.clear();
       await settingsBox.clear();
 
       if (context.mounted) {

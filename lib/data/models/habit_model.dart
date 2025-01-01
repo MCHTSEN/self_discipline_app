@@ -6,54 +6,87 @@ part 'habit_model.g.dart';
 @HiveType(typeId: 0)
 class HabitModel extends HiveObject {
   @HiveField(0)
-  String id;
+  final String id;
+
   @HiveField(1)
-  String title;
+  final String title;
+
   @HiveField(2)
-  String iconPath;
+  final String iconPath;
+
   @HiveField(3)
-  int targetAmount;
+  final String targetType;
+
   @HiveField(4)
-  String frequency;
+  final int targetValue;
+
   @HiveField(5)
-  int? targetDurationInMinutes;
+  final String frequency;
+
   @HiveField(6)
-  DateTime notificationTime;
+  final List<int>? customDays;
+
+  @HiveField(7)
+  final DateTime? notificationTime;
+
+  @HiveField(8)
+  final int difficulty;
+
+  @HiveField(9)
+  final List<DateTime> completions;
+
+  @HiveField(10)
+  final int currentStreak;
+
+  @HiveField(11)
+  final int bestStreak;
 
   HabitModel({
     required this.id,
     required this.title,
     required this.iconPath,
-    required this.targetAmount,
+    required this.targetType,
+    required this.targetValue,
     required this.frequency,
-    this.targetDurationInMinutes,
-    required this.notificationTime,
+    this.customDays,
+    this.notificationTime,
+    required this.difficulty,
+    this.completions = const [],
+    this.currentStreak = 0,
+    this.bestStreak = 0,
   });
-
-  HabitEntity toEntity() {
-    return HabitEntity(
-      id: id,
-      title: title,
-      iconPath: iconPath,
-      targetAmount: targetAmount,
-      frequency: frequency,
-      targetDuration: targetDurationInMinutes != null
-          ? Duration(minutes: targetDurationInMinutes!)
-          : null,
-      notificationTime: notificationTime,
-    );
-  }
 
   factory HabitModel.fromEntity(HabitEntity entity) {
     return HabitModel(
       id: entity.id,
       title: entity.title,
       iconPath: entity.iconPath,
-      targetAmount: entity.targetAmount,
+      targetType: entity.targetType,
+      targetValue: entity.targetValue,
       frequency: entity.frequency,
-      targetDurationInMinutes:
-          entity.targetDuration != null ? entity.targetDuration!.inMinutes : null,
+      customDays: entity.customDays,
       notificationTime: entity.notificationTime,
+      difficulty: entity.difficulty,
+      completions: entity.completions,
+      currentStreak: entity.currentStreak,
+      bestStreak: entity.bestStreak,
+    );
+  }
+
+  HabitEntity toEntity() {
+    return HabitEntity(
+      id: id,
+      title: title,
+      iconPath: iconPath,
+      targetType: targetType,
+      targetValue: targetValue,
+      frequency: frequency,
+      customDays: customDays,
+      notificationTime: notificationTime,
+      difficulty: difficulty,
+      completions: completions,
+      currentStreak: currentStreak,
+      bestStreak: bestStreak,
     );
   }
 }
