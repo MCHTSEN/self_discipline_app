@@ -66,7 +66,7 @@ class SettingsPage extends ConsumerWidget {
           ),
           SliverList(
             delegate: SliverChildListDelegate([
-              _buildAppearanceSection(context, ref, settings),
+              _buildAppearanceSection(context, ref),
               _buildPreferencesSection(context, ref, settings),
               _buildAboutSection(context),
               _buildLegalSection(context),
@@ -79,16 +79,24 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildAppearanceSection(
-      BuildContext context, WidgetRef ref, AppSettings settings) {
+  Widget _buildAppearanceSection(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(appThemeProvider);
+    final language = ref.watch(appLanguageProvider);
+
     return SettingsSection(
       title: AppStrings.appearance,
       children: [
         SettingsTile(
           title: AppStrings.theme,
-          subtitle: SettingsUtils.getThemeText(settings.themeMode),
+          subtitle: SettingsUtils.getThemeText(themeMode),
           icon: Icons.brightness_6,
           onTap: () => SettingsDialogs.showThemeSelector(context, ref),
+        ),
+        SettingsTile(
+          title: AppStrings.language,
+          subtitle: SettingsUtils.getLanguageText(language),
+          icon: Icons.language,
+          onTap: () => SettingsDialogs.showLanguageSelector(context, ref),
         ),
       ],
     );
@@ -99,12 +107,6 @@ class SettingsPage extends ConsumerWidget {
     return SettingsSection(
       title: AppStrings.preferences,
       children: [
-        SettingsTile(
-          title: AppStrings.language,
-          subtitle: SettingsUtils.getLanguageText(settings.language),
-          icon: Icons.language,
-          onTap: () => SettingsDialogs.showLanguageSelector(context, ref),
-        ),
         SettingsSwitchTile(
           title: AppStrings.notifications,
           subtitle: AppStrings.notificationsSubtitle,
