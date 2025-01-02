@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/foundation.dart';
 import 'package:self_discipline_app/core/helper/gap.dart';
-import 'package:self_discipline_app/presentation/viewmodels/providers.dart';
-import 'package:self_discipline_app/presentation/viewmodels/settings_notifier.dart';
 import 'package:self_discipline_app/presentation/viewmodels/habit_list_notifier.dart';
 
 class HeaderSection extends ConsumerWidget {
@@ -17,62 +14,72 @@ class HeaderSection extends ConsumerWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Text(
-                'Hello, Mucahit',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Hello, Mucahit',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
+                    habitsState.when(
+                      data: (habits) {
+                        final completedToday =
+                            habits.where((h) => h.isCompletedToday).length;
+                        final total = habits.length;
+                        return Text(
+                          '$completedToday of $total tasks completed',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.white.withOpacity(0.9),
+                                  ),
+                        );
+                      },
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
               ),
-              habitsState.when(
-                data: (habits) {
-                  final completedToday =
-                      habits.where((h) => h.isCompletedToday).length;
-                  final total = habits.length;
-                  return Text(
-                    '$completedToday of $total tasks completed',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withOpacity(0.9),
-                        ),
-                  );
-                },
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.local_fire_department_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    Gap.extraLow,
+                    Text(
+                      '7 Days',
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
         ),
-        if (kDebugMode) _buildClearCacheButton(context, ref),
       ],
     );
-  }
-
-  Widget _buildClearCacheButton(BuildContext context, WidgetRef ref) {
-    return IconButton(
-      onPressed: () => _clearCache(context, ref),
-      icon: const Icon(Icons.cleaning_services, color: Colors.white, size: 20),
-      padding: EdgeInsets.zero,
-      tooltip: 'Clear Cache (Debug)',
-    );
-  }
-
-  Future<void> _clearCache(BuildContext context, WidgetRef ref) async {
-    final habitBox = ref.read(habitBoxProvider);
-    final settingsBox = ref.read(settingsBoxProvider);
-
-    await habitBox.clear();
-    await settingsBox.clear();
-
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cache cleared'),
-          duration: Duration(seconds: 1),
-        ),
-      );
-    }
   }
 }
