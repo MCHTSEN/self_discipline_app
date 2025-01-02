@@ -120,43 +120,38 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
   Widget build(BuildContext context) {
     final currentStreak = _getCurrentStreak();
     final screenWidth = MediaQuery.of(context).size.width;
-    final dayWidth = (screenWidth - 32) / 7;
+    final dayWidth = (screenWidth - 103) / 7;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: ProjectPaddingType.defaultPadding.symmetricHorizontalPadding,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                _currentDate,
-                style: Theme.of(context).textTheme.labelLarge!.copyWith(),
-              ),
-              Row(
-                children: [
-                  Text(
-                    'Streak:',
-                    style: Theme.of(context).textTheme.labelLarge!.copyWith(),
-                  ),
-                  Gap.low,
-                  StreakIndicator(streak: currentStreak),
-                ],
-              ),
-            ],
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(_currentDate, style: Theme.of(context).textTheme.bodyMedium),
+            Row(
+              children: [
+                Text(
+                  'Streak:',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                Gap.low,
+                StreakIndicator(streak: currentStreak),
+              ],
+            ),
+          ],
         ),
         Gap.low,
         SizedBox(
-          height: 90,
+          height: 70,
           child: PageView.builder(
             controller: _pageController,
             itemCount: totalWeeks,
             itemBuilder: (context, weekIndex) {
               final weekDays = _getDaysInWeek(weekIndex);
               return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: weekDays.map((date) {
                   final bool isCompleted = _isDateCompleted(date);
                   final bool isCurrentDay = date.day == currentDate.day &&
@@ -165,15 +160,17 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
 
                   return Container(
                     width: dayWidth,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    margin: const EdgeInsets.symmetric(horizontal: 1),
                     decoration: BoxDecoration(
                       color: isCurrentDay
                           ? AppSecondaryColors.liquidLava.withOpacity(.7)
                           : isCompleted
                               ? AppSecondaryColors.liquidLava.withOpacity(.07)
-                              : Colors.grey[200],
-                      borderRadius: ProjectRadiusType.xLargeRadius.allRadius,
+                              : isDarkMode
+                                  ? AppSecondaryColors.gluonGrey
+                                  : Colors.grey[200],
+                      borderRadius: ProjectRadiusType.largeRadius.allRadius,
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -181,16 +178,18 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
                         isCompleted
                             ? const Text(
                                 '🔥',
-                                style: TextStyle(fontSize: 17),
+                                style: TextStyle(fontSize: 14),
                               )
                             : Container(
-                                width: 16,
-                                height: 16,
-                                margin: const EdgeInsets.symmetric(vertical: 3),
+                                width: 12,
+                                height: 12,
+                                margin: const EdgeInsets.symmetric(vertical: 2),
                                 decoration: BoxDecoration(
                                   color: isCurrentDay
                                       ? AppSecondaryColors.liquidLava
-                                      : Colors.grey[400],
+                                      : isDarkMode
+                                          ? AppSecondaryColors.dustyGrey
+                                          : Colors.grey[400],
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -198,7 +197,14 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
                           DateFormat('d\nEEE').format(date),
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: isCurrentMonth ? Colors.black : Colors.grey,
+                            fontSize: 11,
+                            color: isCurrentMonth
+                                ? isDarkMode
+                                    ? AppColors.textPrimaryDark
+                                    : AppColors.textPrimaryLight
+                                : isDarkMode
+                                    ? AppColors.textSecondaryDark
+                                    : AppColors.textSecondaryLight,
                             fontWeight: isCurrentMonth
                                 ? FontWeight.bold
                                 : FontWeight.normal,

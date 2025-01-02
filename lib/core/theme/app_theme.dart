@@ -96,32 +96,16 @@ class AppTheme {
       brightness: Brightness.dark,
       primaryColor: AppSecondaryColors.liquidLava,
       scaffoldBackgroundColor: AppSecondaryColors.darkVoid,
-      textTheme: TextTheme(
-        headlineLarge: TextStyle(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-          color: AppSecondaryColors.snow,
-        ),
-        bodyLarge: TextStyle(
-          fontSize: 16,
-          color: AppSecondaryColors.snow,
-        ),
-        bodyMedium: TextStyle(
-          fontSize: 14,
-          color: AppSecondaryColors.snow,
-        ),
-        labelLarge: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: AppSecondaryColors.snow,
-        ),
-      ),
+      textTheme: AppTextStyles.darkTheme,
 
       // AppBar theme
       appBarTheme: AppBarTheme(
         backgroundColor: AppSecondaryColors.darkVoid,
         foregroundColor: AppSecondaryColors.snow,
         elevation: 0,
+        iconTheme: IconThemeData(
+          color: AppSecondaryColors.snow,
+        ),
       ),
 
       // Bottom Navigation theme
@@ -142,10 +126,57 @@ class AppTheme {
       // Card theme
       cardTheme: CardTheme(
         color: AppSecondaryColors.gluonGrey,
-        elevation: 2,
+        elevation: 4,
+        shadowColor: Colors.black.withOpacity(0.3),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
+      ),
+
+      // Input decoration theme
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppSecondaryColors.gluonGrey,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppSecondaryColors.slateGrey),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppSecondaryColors.slateGrey),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide:
+              BorderSide(color: AppSecondaryColors.liquidLava, width: 2),
+        ),
+        labelStyle: TextStyle(color: AppSecondaryColors.dustyGrey),
+        hintStyle: TextStyle(color: AppSecondaryColors.dustyGrey),
+      ),
+
+      // Button theme
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppSecondaryColors.liquidLava,
+          foregroundColor: AppSecondaryColors.snow,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+
+      // Dialog theme
+      dialogTheme: DialogTheme(
+        backgroundColor: AppSecondaryColors.gluonGrey,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+
+      // Divider theme
+      dividerTheme: DividerThemeData(
+        color: AppSecondaryColors.slateGrey,
+        thickness: 1,
       ),
 
       colorScheme: ColorScheme.dark(
@@ -153,11 +184,12 @@ class AppTheme {
         secondary: AppSecondaryColors.liquidLava,
         surface: AppSecondaryColors.gluonGrey,
         background: AppSecondaryColors.darkVoid,
-        error: Colors.red,
+        error: AppColors.errorDark,
         onPrimary: AppSecondaryColors.snow,
         onSecondary: AppSecondaryColors.snow,
         onSurface: AppSecondaryColors.snow,
         onBackground: AppSecondaryColors.snow,
+        onError: AppSecondaryColors.snow,
       ),
     );
   }

@@ -1,13 +1,16 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:self_discipline_app/core/constants/app_strings.dart';
 import 'package:self_discipline_app/core/utils/logger.dart';
+import 'package:self_discipline_app/presentation/pages/settings/components/settings_dialogs.dart';
+import 'package:self_discipline_app/presentation/pages/settings/components/settings_section.dart';
+import 'package:self_discipline_app/presentation/pages/settings/components/settings_switch_tile.dart';
+import 'package:self_discipline_app/presentation/pages/settings/components/settings_tile.dart';
+import 'package:self_discipline_app/presentation/pages/settings/components/settings_utils.dart';
 import 'package:self_discipline_app/presentation/viewmodels/providers.dart';
 import 'package:self_discipline_app/presentation/viewmodels/settings_notifier.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'dart:io';
 
 @RoutePage()
 class SettingsPage extends ConsumerWidget {
@@ -19,16 +22,58 @@ class SettingsPage extends ConsumerWidget {
     final settings = ref.watch(appSettingsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
-      body: ListView(
-        children: [
-          _buildAppearanceSection(context, ref, settings),
-          _buildPreferencesSection(context, ref, settings),
-          _buildAboutSection(context, settings),
-          _buildLegalSection(context, settings),
-          if (kDebugMode) _buildDebugSection(context, ref),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 120.0,
+            floating: false,
+            pinned: true,
+            centerTitle: true,
+            flexibleSpace: FlexibleSpaceBar(
+              centerTitle: true,
+              titlePadding: const EdgeInsets.only(bottom: 16),
+              title: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(
+                    Icons.settings_outlined,
+                    size: 32,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    AppStrings.settings,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFFFF7F50), // Coral
+                      Color(0xFFFF6B45), // Lighter coral
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverList(
+            delegate: SliverChildListDelegate([
+              _buildAppearanceSection(context, ref, settings),
+              _buildPreferencesSection(context, ref, settings),
+              _buildAboutSection(context),
+              _buildLegalSection(context),
+              if (kDebugMode) _buildDebugSection(context, ref),
+              const SizedBox(height: 20),
+            ]),
+          ),
         ],
       ),
     );
@@ -36,14 +81,14 @@ class SettingsPage extends ConsumerWidget {
 
   Widget _buildAppearanceSection(
       BuildContext context, WidgetRef ref, AppSettings settings) {
-    return _buildSection(
-      'Appearance',
-      [
-        ListTile(
-          title: const Text('Theme'),
-          subtitle: Text(_getThemeText(settings.themeMode)),
-          leading: const Icon(Icons.brightness_6),
-          onTap: () => _showThemeSelector(context, ref),
+    return SettingsSection(
+      title: AppStrings.appearance,
+      children: [
+        SettingsTile(
+          title: AppStrings.theme,
+          subtitle: SettingsUtils.getThemeText(settings.themeMode),
+          icon: Icons.brightness_6,
+          onTap: () => SettingsDialogs.showThemeSelector(context, ref),
         ),
       ],
     );
@@ -51,13 +96,19 @@ class SettingsPage extends ConsumerWidget {
 
   Widget _buildPreferencesSection(
       BuildContext context, WidgetRef ref, AppSettings settings) {
-    return _buildSection(
-      'Preferences',
-      [
-        SwitchListTile(
-          title: const Text('Notifications'),
-          subtitle: const Text('Daily reminders and alerts'),
-          secondary: const Icon(Icons.notifications_outlined),
+    return SettingsSection(
+      title: AppStrings.preferences,
+      children: [
+        SettingsTile(
+          title: AppStrings.language,
+          subtitle: SettingsUtils.getLanguageText(settings.language),
+          icon: Icons.language,
+          onTap: () => SettingsDialogs.showLanguageSelector(context, ref),
+        ),
+        SettingsSwitchTile(
+          title: AppStrings.notifications,
+          subtitle: AppStrings.notificationsSubtitle,
+          icon: Icons.notifications_outlined,
           value: settings.isNotificationsEnabled,
           onChanged: (value) async {
             await ref
@@ -69,362 +120,79 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildAboutSection(BuildContext context, AppSettings settings) {
-    return _buildSection(
-      'About',
-      [
-        ListTile(
-          title: const Text('Contact Us'),
-          leading: const Icon(Icons.mail_outline),
-          onTap: () => _launchURL('mailto:support@example.com'),
+  Widget _buildAboutSection(BuildContext context) {
+    return SettingsSection(
+      title: AppStrings.about,
+      children: [
+        SettingsTile(
+          title: AppStrings.contactUs,
+          icon: Icons.mail_outline,
+          onTap: () => SettingsUtils.launchURL(AppStrings.supportEmail),
         ),
-        ListTile(
-          title: const Text('About App'),
-          subtitle: const Text('Version 1.0.0'),
-          leading: const Icon(Icons.info_outline),
-          onTap: () => _showAboutDialog(context),
+        SettingsTile(
+          title: AppStrings.aboutApp,
+          subtitle: AppStrings.appVersion,
+          icon: Icons.info_outline,
+          onTap: () => SettingsDialogs.showAboutDialog(context),
         ),
-        ListTile(
-          title: const Text('Data Usage'),
-          leading: const Icon(Icons.data_usage_outlined),
-          onTap: () => _showDataUsageInfo(context),
+        SettingsTile(
+          title: AppStrings.dataUsage,
+          icon: Icons.data_usage_outlined,
+          onTap: () => SettingsDialogs.showDataUsageInfo(context),
         ),
       ],
     );
   }
 
-  Widget _buildLegalSection(BuildContext context, AppSettings settings) {
-    const String defaultPrivacyPolicy =
-        'https://enshrined-xylophone-794.notion.site/Privacy-Policy-1684dd6a6c7380d0b48afeadf1266019';
-    const String defaultTermsOfService =
-        'https://enshrined-xylophone-794.notion.site/Terms-of-Service-1684dd6a6c7380b2ae91fb917e6bf321';
-    return _buildSection(
-      'Legal',
-      [
-        ListTile(
-          title: const Text('Privacy Policy'),
-          leading: const Icon(Icons.privacy_tip_outlined),
-          onTap: () => _launchURL(defaultPrivacyPolicy),
+  Widget _buildLegalSection(BuildContext context) {
+    return SettingsSection(
+      title: AppStrings.legal,
+      children: [
+        SettingsTile(
+          title: AppStrings.privacyPolicy,
+          icon: Icons.privacy_tip_outlined,
+          onTap: () => SettingsUtils.launchURL(AppStrings.privacyPolicyUrl),
         ),
-        ListTile(
-          title: const Text('Terms of Service'),
-          leading: const Icon(Icons.description_outlined),
-          onTap: () => _launchURL(defaultTermsOfService),
+        SettingsTile(
+          title: AppStrings.termsOfService,
+          icon: Icons.description_outlined,
+          onTap: () => SettingsUtils.launchURL(AppStrings.termsOfServiceUrl),
         ),
       ],
     );
   }
 
   Widget _buildDebugSection(BuildContext context, WidgetRef ref) {
-    return _buildSection(
-      'Debug',
-      [
-        ListTile(
-          title: const Text('Clear All Data'),
-          subtitle: const Text('Delete all local data'),
-          leading: const Icon(Icons.cleaning_services),
-          onTap: () => _clearAllData(context, ref),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSection(String title, List<Widget> children) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return SettingsSection(
+      title: AppStrings.debug,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(
-            title.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ),
-        ...children,
-      ],
-    );
-  }
+        SettingsTile(
+          title: AppStrings.clearAllData,
+          subtitle: AppStrings.clearAllDataSubtitle,
+          icon: Icons.cleaning_services,
+          isDestructive: true,
+          onTap: () async {
+            final shouldClear =
+                await SettingsDialogs.showClearDataConfirmation(context);
+            if (shouldClear && context.mounted) {
+              final habitBox = ref.read(habitBoxProvider);
+              final settingsBox = ref.read(settingsBoxProvider);
 
-  void _showThemeSelector(BuildContext context, WidgetRef ref) {
-    if (Platform.isIOS) {
-      showCupertinoModalPopup(
-        context: context,
-        builder: (context) => CupertinoActionSheet(
-          title: const Text('Select Theme'),
-          actions: [
-            CupertinoActionSheetAction(
-              onPressed: () async {
-                await ref
-                    .read(appSettingsProvider.notifier)
-                    .setThemeMode(ThemeMode.system);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              },
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.brightness_auto),
-                  SizedBox(width: 10),
-                  Text('System Default'),
-                ],
-              ),
-            ),
-            CupertinoActionSheetAction(
-              onPressed: () async {
-                await ref
-                    .read(appSettingsProvider.notifier)
-                    .setThemeMode(ThemeMode.light);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              },
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.brightness_5),
-                  SizedBox(width: 10),
-                  Text('Light'),
-                ],
-              ),
-            ),
-            CupertinoActionSheetAction(
-              onPressed: () async {
-                await ref
-                    .read(appSettingsProvider.notifier)
-                    .setThemeMode(ThemeMode.dark);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              },
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.brightness_4),
-                  SizedBox(width: 10),
-                  Text('Dark'),
-                ],
-              ),
-            ),
-          ],
-          cancelButton: CupertinoActionSheetAction(
-            onPressed: () => Navigator.pop(context),
-            isDestructiveAction: true,
-            child: const Text('Cancel'),
-          ),
-        ),
-      );
-    } else {
-      showModalBottomSheet(
-        context: context,
-        builder: (context) => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.brightness_auto),
-              title: const Text('System Default'),
-              onTap: () async {
-                await ref
-                    .read(appSettingsProvider.notifier)
-                    .setThemeMode(ThemeMode.system);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.brightness_5),
-              title: const Text('Light'),
-              onTap: () async {
-                await ref
-                    .read(appSettingsProvider.notifier)
-                    .setThemeMode(ThemeMode.light);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.brightness_4),
-              title: const Text('Dark'),
-              onTap: () async {
-                await ref
-                    .read(appSettingsProvider.notifier)
-                    .setThemeMode(ThemeMode.dark);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              },
-            ),
-          ],
-        ),
-      );
-    }
-  }
+              await habitBox.clear();
+              await settingsBox.clear();
 
-  void _showDataUsageInfo(BuildContext context) {
-    if (Platform.isIOS) {
-      showCupertinoDialog(
-        context: context,
-        builder: (context) => CupertinoAlertDialog(
-          title: const Text('Data Usage'),
-          content: const Text(
-            'We store your habit data locally on your device. '
-            'This includes:\n\n'
-            '• Your habits and their settings\n'
-            '• Completion records\n'
-            '• App preferences\n\n'
-            'No personal data is collected or shared with third parties. '
-            'All your data remains on your device and is never uploaded to any server.',
-          ),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
-            ),
-          ],
-        ),
-      );
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Data Usage'),
-          content: const Text(
-            'We store your habit data locally on your device. '
-            'This includes:\n\n'
-            '• Your habits and their settings\n'
-            '• Completion records\n'
-            '• App preferences\n\n'
-            'No personal data is collected or shared with third parties. '
-            'All your data remains on your device and is never uploaded to any server.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
-            ),
-          ],
-        ),
-      );
-    }
-  }
-
-  void _showAboutDialog(BuildContext context) {
-    showAboutDialog(
-      context: context,
-      applicationName: 'Self Discipline',
-      applicationVersion: '1.0.0',
-      applicationIcon: const FlutterLogo(size: 64),
-      children: const [
-        Text(
-          'Self Discipline is a habit tracking app designed to help you build '
-          'better habits and achieve your goals. Track your daily and weekly '
-          'habits, build streaks, and stay motivated with visual progress indicators.',
-        ),
-        SizedBox(height: 16),
-        Text(
-          '© 2024 Self Discipline. All rights reserved.',
-          style: TextStyle(fontSize: 12),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _launchURL(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      debugPrint('Could not launch $url');
-    }
-  }
-
-  Future<void> _clearAllData(BuildContext context, WidgetRef ref) async {
-    bool shouldClear = false;
-
-    if (Platform.isIOS) {
-      await showCupertinoDialog(
-        context: context,
-        builder: (context) => CupertinoAlertDialog(
-          title: const Text('Clear All Data'),
-          content: const Text(
-            'This will delete all your habits and settings. '
-            'This action cannot be undone. Are you sure?',
-          ),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            CupertinoDialogAction(
-              onPressed: () {
-                shouldClear = true;
-                Navigator.pop(context);
-              },
-              isDestructiveAction: true,
-              child: const Text('Clear'),
-            ),
-          ],
-        ),
-      );
-    } else {
-      shouldClear = await showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Clear All Data'),
-              content: const Text(
-                'This will delete all your habits and settings. '
-                'This action cannot be undone. Are you sure?',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.error,
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(AppStrings.dataCleared),
+                    duration: const Duration(seconds: 2),
                   ),
-                  child: const Text('Clear'),
-                ),
-              ],
-            ),
-          ) ??
-          false;
-    }
-
-    if (shouldClear && context.mounted) {
-      final habitBox = ref.read(habitBoxProvider);
-      final settingsBox = ref.read(settingsBoxProvider);
-
-      await habitBox.clear();
-      await settingsBox.clear();
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('All data cleared'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    }
-  }
-
-  String _getThemeText(ThemeMode mode) {
-    switch (mode) {
-      case ThemeMode.system:
-        return 'System Default';
-      case ThemeMode.light:
-        return 'Light';
-      case ThemeMode.dark:
-        return 'Dark';
-    }
+                );
+              }
+            }
+          },
+        ),
+      ],
+    );
   }
 }
