@@ -5,7 +5,6 @@ import 'package:self_discipline_app/presentation/pages/main/main_page.dart';
 import 'package:self_discipline_app/presentation/pages/settings/settings_page.dart';
 import 'package:self_discipline_app/presentation/pages/stats/stats_page.dart';
 import 'package:self_discipline_app/presentation/pages/habit_recommendation/habit_recommendation_page.dart';
-import 'package:self_discipline_app/core/router/route_transitions.dart';
 
 part 'app_router.gr.dart';
 
@@ -17,24 +16,12 @@ class AppRouter extends _$AppRouter {
           page: MainRoute.page,
           initial: true,
           children: [
-            CustomRoute(
-              page: HomeRoute.page,
-              transitionsBuilder: RouteTransitions.slideTransition,
-            ),
-            CustomRoute(
-              page: StatsRoute.page,
-              transitionsBuilder: RouteTransitions.fadeSlideTransition,
-            ),
-            CustomRoute(
-              page: HabitRecommendationRoute.page,
-              transitionsBuilder: RouteTransitions.scaleTransition,
-            ),
-            CustomRoute(
-              page: SettingsRoute.page,
-              transitionsBuilder: TransitionsBuilders.fadeIn,
-            ),
+            CustomRoute(page: HomeRoute.page),
+            CustomRoute(page: StatsRoute.page),
+            CustomRoute(page: HabitRecommendationRoute.page),
+            CustomRoute(page: SettingsRoute.page),
           ],
         ),
-        CustomRoute(page: HabitCreationRoute.page),
+        CustomRoute(page: HabitCreationRoute.page)
       ];
 }
