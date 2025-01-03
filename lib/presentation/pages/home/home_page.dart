@@ -60,36 +60,106 @@ class HomePageState extends ConsumerState<HomePage> {
   Widget _buildHeaderCard(BuildContext context) {
     return Container(
       margin: ProjectPaddingType.defaultPadding.allPadding,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
             AppSecondaryColors.liquidLava,
+            AppSecondaryColors.liquidLava.withOpacity(0.9),
             AppSecondaryColors.liquidLava.withOpacity(0.8),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
+          stops: const [0.2, 0.6, 0.9],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: AppSecondaryColors.liquidLava.withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: AppSecondaryColors.liquidLava.withOpacity(0.4),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+            spreadRadius: -2,
+          ),
+          BoxShadow(
+            color: AppSecondaryColors.liquidLava.withOpacity(0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 12),
+            spreadRadius: -4,
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          const HeaderSection(),
-          Gap.low,
-          Text(
-            '🚀 Small steps lead to big changes.',
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  height: 0.8,
-                  color: Colors.white,
+          Positioned(
+            right: -30,
+            top: -30,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    Colors.white.withOpacity(0.15),
+                    Colors.white.withOpacity(0.05),
+                  ],
                 ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: -20,
+            bottom: -20,
+            child: Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    Colors.white.withOpacity(0.12),
+                    Colors.white.withOpacity(0.04),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const HeaderSection(),
+              Gap.low,
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.rocket_launch_rounded,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                    Gap.extraLow,
+                    Flexible(
+                      child: Text(
+                        'Keep pushing your limits!',
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              height: 1.2,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -59,7 +59,7 @@ class AppInitializer {
     return ProviderScope(
       overrides: overrides,
       child: DevicePreview(
-        enabled: false,
+        enabled: true,
         builder: (context) => app,
       ),
     );
