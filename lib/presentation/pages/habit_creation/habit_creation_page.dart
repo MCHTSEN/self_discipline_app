@@ -30,6 +30,7 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
   int _targetDuration = 30;
   int _targetQuantity = 1;
   bool _isCustomTarget = false;
+  int _targetRepetition = 1;
   String _frequency = 'daily';
   List<int>? _customDays;
   TimeOfDay _notificationTime = const TimeOfDay(hour: 8, minute: 0);
@@ -37,17 +38,12 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
 
   static const List<int> predefinedDurations = [15, 30, 45, 60, 90];
   static const List<int> predefinedQuantities = [1, 2, 3, 5, 10];
-  static const List<String> frequencies = ['daily', 'weekly', 'custom'];
-  static const List<String> weekdays = [
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-    'Sat',
-    'Sun'
+  static const List<String> frequencies = [
+    'daily',
+    'weekly',
+    'monthly',
+    'custom'
   ];
-  List<int> _selectedWeekdays = [];
 
   @override
   Widget build(BuildContext context) {
@@ -252,22 +248,6 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
                             (_targetType == 'duration'
                                 ? _targetDuration == value
                                 : _targetQuantity == value),
-                        selectedColor:
-                            AppSecondaryColors.liquidLava.withOpacity(0.2),
-                        labelStyle: TextStyle(
-                          color: !_isCustomTarget &&
-                                  (_targetType == 'duration'
-                                      ? _targetDuration == value
-                                      : _targetQuantity == value)
-                              ? AppSecondaryColors.liquidLava
-                              : Colors.grey.shade700,
-                          fontWeight: !_isCustomTarget &&
-                                  (_targetType == 'duration'
-                                      ? _targetDuration == value
-                                      : _targetQuantity == value)
-                              ? FontWeight.w600
-                              : FontWeight.normal,
-                        ),
                         onSelected: (selected) {
                           setState(() {
                             _isCustomTarget = false;
@@ -304,95 +284,22 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
   Widget _buildFrequencyCard() {
     return _buildCard(
       title: 'FREQUENCY',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Wrap(
-            spacing: 8,
-            children: frequencies.map((frequency) {
-              return ChoiceChip(
-                label: Text(frequency.toUpperCase()),
-                selected: _frequency == frequency,
-                selectedColor: AppSecondaryColors.liquidLava.withOpacity(0.2),
-                labelStyle: TextStyle(
-                  color: _frequency == frequency
-                      ? AppSecondaryColors.liquidLava
-                      : Colors.grey.shade700,
-                  fontWeight: _frequency == frequency
-                      ? FontWeight.w600
-                      : FontWeight.normal,
-                ),
-                onSelected: (selected) {
-                  setState(() {
-                    _frequency = frequency;
-                    if (frequency != 'weekly') {
-                      _selectedWeekdays = [];
-                    }
-                    if (frequency != 'custom') {
-                      _customDays = null;
-                    }
-                  });
-                },
-              );
-            }).toList(),
-          ),
-          if (_frequency == 'weekly') ...[
-            Gap.normal,
-            Container(
-              height: 44,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: weekdays.length,
-                separatorBuilder: (context, index) => Gap.extraLow,
-                itemBuilder: (context, index) {
-                  final isSelected = _selectedWeekdays.contains(index);
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        if (isSelected) {
-                          _selectedWeekdays.remove(index);
-                        } else {
-                          _selectedWeekdays.add(index);
-                        }
-                        _selectedWeekdays.sort();
-                      });
-                    },
-                    child: Container(
-                      width: 44,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppSecondaryColors.liquidLava
-                            : AppSecondaryColors.liquidLava.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        weekdays[index],
-                        style: TextStyle(
-                          color: isSelected
-                              ? Colors.white
-                              : AppSecondaryColors.liquidLava,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            if (_selectedWeekdays.isEmpty) ...[
-              Gap.low,
-              Text(
-                'Please select at least one day',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ],
-        ],
+      child: Wrap(
+        spacing: 8,
+        children: frequencies.map((frequency) {
+          return ChoiceChip(
+            label: Text(frequency.toUpperCase()),
+            selected: _frequency == frequency,
+            onSelected: (selected) {
+              setState(() {
+                _frequency = frequency;
+                if (frequency != 'custom') {
+                  _customDays = null;
+                }
+              });
+            },
+          );
+        }).toList(),
       ),
     );
   }
@@ -753,17 +660,6 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      // Validate weekday selection for weekly frequency
-      if (_frequency == 'weekly' && _selectedWeekdays.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please select at least one weekday'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
       final habit = HabitEntity(
         id: DateTime.now().toIso8601String(),
         title: _title,
@@ -772,7 +668,7 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
         targetValue:
             _targetType == 'duration' ? _targetDuration : _targetQuantity,
         frequency: _frequency,
-        customDays: _frequency == 'weekly' ? _selectedWeekdays : _customDays,
+        customDays: _customDays,
         notificationTime: DateTime(
           DateTime.now().year,
           DateTime.now().month,

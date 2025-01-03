@@ -25,27 +25,26 @@ class SettingsPage extends ConsumerWidget {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 140.0,
+            expandedHeight: 120.0,
             floating: false,
             pinned: true,
             centerTitle: true,
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: true,
               titlePadding: const EdgeInsets.only(bottom: 16),
-              title: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
+              title: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Icon(
                     Icons.settings_outlined,
-                    size: 24,
+                    size: 32,
                     color: Colors.white,
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(height: 8),
                   Text(
                     AppStrings.settings,
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -57,8 +56,8 @@ class SettingsPage extends ConsumerWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Color(0xFF3F51B5), // Indigo
-                      Color(0xFF303F9F), // Darker indigo
+                      Color(0xFFFF7F50), // Coral
+                      Color(0xFFFF6B45), // Lighter coral
                     ],
                   ),
                 ),

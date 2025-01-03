@@ -15,27 +15,26 @@ class HabitRecommendationPage extends ConsumerWidget {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 140.0,
+            expandedHeight: 120.0,
             floating: false,
             pinned: true,
             centerTitle: true,
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: true,
               titlePadding: const EdgeInsets.only(bottom: 16),
-              title: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
+              title: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Icon(
                     Icons.lightbulb_outline,
-                    size: 24,
+                    size: 32,
                     color: Colors.white,
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(height: 8),
                   Text(
                     'Recommended Habits',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
