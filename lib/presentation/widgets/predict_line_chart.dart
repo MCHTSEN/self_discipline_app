@@ -4,14 +4,13 @@ import 'package:self_discipline_app/core/theme/app_colors.dart';
 import 'package:self_discipline_app/presentation/widgets/line_chart.dart';
 
 class LineChartSample5 extends StatefulWidget {
-   LineChartSample5({
+  LineChartSample5({
     super.key,
     Color? gradientColor1,
     Color? gradientColor2,
     Color? indicatorStrokeColor,
   })  : gradientColor1 = gradientColor1 ?? Color.fromARGB(255, 79, 101, 117),
-        gradientColor2 = gradientColor2 ??  Color.fromARGB(255, 151, 214, 223),
-        
+        gradientColor2 = gradientColor2 ?? Color.fromARGB(255, 151, 214, 223),
         indicatorStrokeColor =
             indicatorStrokeColor ?? ChartColors.mainTextColor1;
 
@@ -139,7 +138,7 @@ class _LineChartSample5State extends State<LineChartSample5> {
     ];
 
     return AspectRatio(
-      aspectRatio: 2.5,
+      aspectRatio: 2.8,
       child: LayoutBuilder(builder: (context, constraints) {
         return LineChart(
           LineChartData(
@@ -190,7 +189,7 @@ class _LineChartSample5State extends State<LineChartSample5> {
               ),
               bottomTitles: AxisTitles(
                 sideTitles: SideTitles(
-                  showTitles: true,
+                  showTitles: false,
                   interval: 1,
                   getTitlesWidget: (value, meta) {
                     return bottomTitleWidgets(
@@ -199,36 +198,32 @@ class _LineChartSample5State extends State<LineChartSample5> {
                       constraints.maxWidth,
                     );
                   },
-                  reservedSize: 29,
+                  reservedSize: 0,
                 ),
               ),
               rightTitles: const AxisTitles(
                 axisNameWidget: Text(''),
                 sideTitles: SideTitles(
+                  
                   showTitles: false,
                   reservedSize: 0,
                 ),
+                axisNameSize: 0,
               ),
-              
               topTitles: const AxisTitles(
                 axisNameWidget: Text(
-                  ' Yearly Progress Prediction',
+                  '',
                   textAlign: TextAlign.left,
                 ),
-                axisNameSize: 24,
+                axisNameSize: 0,
                 sideTitles: SideTitles(
-                  showTitles: true,
+                  showTitles: false,
                   reservedSize: 0,
                 ),
               ),
             ),
             gridData: const FlGridData(show: false),
-            borderData: FlBorderData(
-              show: true,
-              border: Border.all(
-                color: ChartColors.borderColor,
-              ),
-            ),
+            borderData: FlBorderData(show: false),
           ),
         );
       }),

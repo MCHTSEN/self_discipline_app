@@ -20,7 +20,7 @@ class HabitsSection extends ConsumerWidget {
 
   bool _shouldShowHabit(HabitEntity habit) {
     final now = DateTime.now();
-    final dayOfWeek = now.weekday; // 1 (Monday) to 7 (Sunday)
+    final dayOfWeek = now.weekday;
 
     if (habit.frequency == 'daily') {
       return true;
@@ -35,7 +35,25 @@ class HabitsSection extends ConsumerWidget {
     final filteredHabits = habits.where(_shouldShowHabit).toList();
 
     if (filteredHabits.isEmpty) {
-      return const Text('No habits scheduled for today.');
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.task_alt,
+              size: 48,
+              color: AppSecondaryColors.liquidLava.withOpacity(0.5),
+            ),
+            Gap.normal,
+            Text(
+              'No habits scheduled for today',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Colors.grey,
+                  ),
+            ),
+          ],
+        ),
+      );
     }
 
     final now = DateTime.now();
@@ -55,46 +73,67 @@ class HabitsSection extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-          color: AppSecondaryColors.liquidLava.withOpacity(0.05),
-          borderRadius: ProjectRadiusType.extraLargeRadius.allRadius),
-      child: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+        color: Theme.of(context).cardColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
               children: [
                 Text(
-                    '🌟 Today\'s Tasks (${completedHabits.length}/${filteredHabits.length})',
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineSmall!
-                        .copyWith(fontSize: 16)),
+                  '🎯 Today\'s Tasks',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
                 Gap.normal,
-                Expanded(
-                    child: Container(
-                        height: 2,
-                        color: const Color.fromARGB(255, 120, 119, 119)))
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppSecondaryColors.liquidLava.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${completedHabits.length}/${filteredHabits.length}',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppSecondaryColors.liquidLava,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
               ],
             ),
-            Gap.low,
-            Expanded(
-              child: CustomScrollView(
-                primary: false,
-                slivers: [
-                  if (uncompletedHabits.isNotEmpty) ...[
-                    _buildSectionHeader(context, 'To Complete'),
-                    _buildHabitsList(uncompletedHabits, false),
-                  ],
-                  if (completedHabits.isNotEmpty) ...[
-                    _buildSectionHeader(context, 'Completed Today'),
-                    _buildHabitsList(completedHabits, true),
-                  ],
+          ),
+          Expanded(
+            child: CustomScrollView(
+              primary: false,
+              slivers: [
+                if (uncompletedHabits.isNotEmpty) ...[
+                  _buildSectionHeader(context, 'To Complete'),
+                  _buildHabitsList(uncompletedHabits, false),
                 ],
-              ),
-            )
-          ],
-        ),
+                if (completedHabits.isNotEmpty) ...[
+                  _buildSectionHeader(context, 'Completed Today'),
+                  _buildHabitsList(completedHabits, true),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -102,7 +141,7 @@ class HabitsSection extends ConsumerWidget {
   Widget _buildSectionHeader(BuildContext context, String title) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         child: Text(
           title,
           style: TextStyle(
@@ -116,18 +155,24 @@ class HabitsSection extends ConsumerWidget {
   }
 
   Widget _buildHabitsList(List<HabitEntity> habits, bool isCompleted) {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final habit = habits[index];
-          return HabitWidget(
-            habit: habit,
-            onComplete: () => onCompleteHabit(habit.id),
-            isCompleted: isCompleted,
-            onUncomplete: () => onUncompleteHabit(habit.id),
-          );
-        },
-        childCount: habits.length,
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final habit = habits[index];
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: HabitWidget(
+                habit: habit,
+                onComplete: () => onCompleteHabit(habit.id),
+                isCompleted: isCompleted,
+                onUncomplete: () => onUncompleteHabit(habit.id),
+              ),
+            );
+          },
+          childCount: habits.length,
+        ),
       ),
     );
   }
