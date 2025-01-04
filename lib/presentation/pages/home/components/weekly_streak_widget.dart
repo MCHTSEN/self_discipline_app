@@ -121,6 +121,7 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
     final currentStreak = _getCurrentStreak();
     final screenWidth = MediaQuery.of(context).size.width;
     final dayWidth = (screenWidth - 103) / 7;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,7 +157,7 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
                   final bool isCurrentDay = date.day == currentDate.day &&
                       date.month == currentDate.month;
                   final bool isCurrentMonth = date.month == currentDate.month;
-              
+
                   return Container(
                     width: dayWidth,
                     padding: const EdgeInsets.symmetric(vertical: 4),
@@ -166,7 +167,9 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
                           ? AppSecondaryColors.liquidLava.withOpacity(.7)
                           : isCompleted
                               ? AppSecondaryColors.liquidLava.withOpacity(.07)
-                              : Colors.grey[200],
+                              : isDarkMode
+                                  ? AppSecondaryColors.gluonGrey
+                                  : Colors.grey[200],
                       borderRadius: ProjectRadiusType.largeRadius.allRadius,
                     ),
                     child: Column(
@@ -180,12 +183,13 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
                             : Container(
                                 width: 12,
                                 height: 12,
-                                margin:
-                                    const EdgeInsets.symmetric(vertical: 2),
+                                margin: const EdgeInsets.symmetric(vertical: 2),
                                 decoration: BoxDecoration(
                                   color: isCurrentDay
                                       ? AppSecondaryColors.liquidLava
-                                      : Colors.grey[400],
+                                      : isDarkMode
+                                          ? AppSecondaryColors.dustyGrey
+                                          : Colors.grey[400],
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -194,8 +198,13 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 11,
-                            color:
-                                isCurrentMonth ? Colors.black : Colors.grey,
+                            color: isCurrentMonth
+                                ? isDarkMode
+                                    ? AppColors.textPrimaryDark
+                                    : AppColors.textPrimaryLight
+                                : isDarkMode
+                                    ? AppColors.textSecondaryDark
+                                    : AppColors.textSecondaryLight,
                             fontWeight: isCurrentMonth
                                 ? FontWeight.bold
                                 : FontWeight.normal,

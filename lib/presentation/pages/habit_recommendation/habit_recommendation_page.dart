@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:self_discipline_app/core/theme/app_colors.dart';
 import 'package:self_discipline_app/domain/entities/habit_entity.dart';
 import 'package:self_discipline_app/presentation/viewmodels/habit_list_notifier.dart';
 
@@ -11,103 +12,160 @@ class HabitRecommendationPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Recommended Habits'),
-      ),
-      body: ListView(
-        children: [
-          _buildCategorySection(
-            context,
-            ref,
-            'Health & Fitness 💪',
-            [
-              _RecommendedHabit(
-                title: 'Daily Exercise',
-                icon: '🏃',
-                targetType: 'duration',
-                targetValue: 30,
-                frequency: 'daily',
-                difficulty: 3,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 120.0,
+            floating: false,
+            pinned: true,
+            centerTitle: true,
+            flexibleSpace: FlexibleSpaceBar(
+              centerTitle: true,
+              titlePadding: const EdgeInsets.only(bottom: 16),
+              title: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(
+                    Icons.lightbulb_outline,
+                    size: 32,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Recommended Habits',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
-              _RecommendedHabit(
-                title: 'Drink Water',
-                icon: '💧',
-                targetType: 'quantity',
-                targetValue: 8,
-                frequency: 'daily',
-                difficulty: 2,
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFFFF7F50), // Coral
+                      Color(0xFFFF6B45), // Lighter coral
+                    ],
+                  ),
+                ),
               ),
-              _RecommendedHabit(
-                title: 'Meditation',
-                icon: '🧘‍♂️',
-                targetType: 'duration',
-                targetValue: 15,
-                frequency: 'daily',
-                difficulty: 2,
-              ),
-            ],
+            ),
           ),
-          _buildCategorySection(
-            context,
-            ref,
-            'Personal Growth 🌱',
-            [
-              _RecommendedHabit(
-                title: 'Read Books',
-                icon: '📚',
-                targetType: 'duration',
-                targetValue: 30,
-                frequency: 'daily',
-                difficulty: 3,
+          SliverList(
+            delegate: SliverChildListDelegate([
+              _buildCategorySection(
+                context,
+                ref,
+                'Health & Fitness',
+                '💪',
+                'Build a stronger, healthier you',
+                [
+                  _RecommendedHabit(
+                    title: 'Daily Exercise',
+                    icon: '🏃',
+                    targetType: 'duration',
+                    targetValue: 30,
+                    frequency: 'daily',
+                    difficulty: 3,
+                    description: 'Stay active with daily workouts',
+                  ),
+                  _RecommendedHabit(
+                    title: 'Drink Water',
+                    icon: '💧',
+                    targetType: 'quantity',
+                    targetValue: 8,
+                    frequency: 'daily',
+                    difficulty: 2,
+                    description: 'Stay hydrated throughout the day',
+                  ),
+                  _RecommendedHabit(
+                    title: 'Meditation',
+                    icon: '🧘‍♂️',
+                    targetType: 'duration',
+                    targetValue: 15,
+                    frequency: 'daily',
+                    difficulty: 2,
+                    description: 'Find inner peace and reduce stress',
+                  ),
+                ],
               ),
-              _RecommendedHabit(
-                title: 'Learn New Skill',
-                icon: '💡',
-                targetType: 'duration',
-                targetValue: 45,
-                frequency: 'daily',
-                difficulty: 4,
+              _buildCategorySection(
+                context,
+                ref,
+                'Personal Growth',
+                '🌱',
+                'Invest in your personal development',
+                [
+                  _RecommendedHabit(
+                    title: 'Read Books',
+                    icon: '📚',
+                    targetType: 'duration',
+                    targetValue: 30,
+                    frequency: 'daily',
+                    difficulty: 3,
+                    description: 'Expand your knowledge daily',
+                  ),
+                  _RecommendedHabit(
+                    title: 'Learn New Skill',
+                    icon: '💡',
+                    targetType: 'duration',
+                    targetValue: 45,
+                    frequency: 'daily',
+                    difficulty: 4,
+                    description: 'Challenge yourself with new abilities',
+                  ),
+                  _RecommendedHabit(
+                    title: 'Journal',
+                    icon: '✍️',
+                    targetType: 'duration',
+                    targetValue: 15,
+                    frequency: 'daily',
+                    difficulty: 2,
+                    description: 'Reflect on your thoughts and growth',
+                  ),
+                ],
               ),
-              _RecommendedHabit(
-                title: 'Journal',
-                icon: '✍️',
-                targetType: 'duration',
-                targetValue: 15,
-                frequency: 'daily',
-                difficulty: 2,
+              _buildCategorySection(
+                context,
+                ref,
+                'Productivity',
+                '⚡',
+                'Maximize your daily efficiency',
+                [
+                  _RecommendedHabit(
+                    title: 'Morning Routine',
+                    icon: '🌅',
+                    targetType: 'duration',
+                    targetValue: 60,
+                    frequency: 'daily',
+                    difficulty: 4,
+                    description: 'Start your day with purpose',
+                  ),
+                  _RecommendedHabit(
+                    title: 'No Social Media',
+                    icon: '📵',
+                    targetType: 'duration',
+                    targetValue: 120,
+                    frequency: 'daily',
+                    difficulty: 4,
+                    description: 'Focus on what truly matters',
+                  ),
+                  _RecommendedHabit(
+                    title: 'Deep Work',
+                    icon: '💻',
+                    targetType: 'duration',
+                    targetValue: 90,
+                    frequency: 'daily',
+                    difficulty: 5,
+                    description: 'Achieve flow state in your work',
+                  ),
+                ],
               ),
-            ],
-          ),
-          _buildCategorySection(
-            context,
-            ref,
-            'Productivity ⚡',
-            [
-              _RecommendedHabit(
-                title: 'Morning Routine',
-                icon: '🌅',
-                targetType: 'duration',
-                targetValue: 60,
-                frequency: 'daily',
-                difficulty: 4,
-              ),
-              _RecommendedHabit(
-                title: 'No Social Media',
-                icon: '📵',
-                targetType: 'duration',
-                targetValue: 120,
-                frequency: 'daily',
-                difficulty: 4,
-              ),
-              _RecommendedHabit(
-                title: 'Deep Work',
-                icon: '💻',
-                targetType: 'duration',
-                targetValue: 90,
-                frequency: 'daily',
-                difficulty: 5,
-              ),
-            ],
+              const SizedBox(height: 20),
+            ]),
           ),
         ],
       ),
@@ -118,48 +176,199 @@ class HabitRecommendationPage extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     String title,
+    String emoji,
+    String subtitle,
     List<_RecommendedHabit> habits,
   ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            title,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-        ),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: habits.length,
-          itemBuilder: (context, index) {
-            final habit = habits[index];
-            return ListTile(
-              leading: Text(
-                habit.icon,
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                emoji,
                 style: const TextStyle(fontSize: 24),
               ),
-              title: Text(habit.title),
-              subtitle: Text(
-                '${habit.targetValue}${habit.targetType == 'duration' ? ' min' : ' times'} | ${habit.frequency}',
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
-              trailing: IconButton(
-                icon: const Icon(Icons.add_circle_outline),
-                onPressed: () => _addHabit(context, ref, habit),
-              ),
-            );
-          },
-        ),
-        const Divider(),
-      ],
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey,
+                ),
+          ),
+          const SizedBox(height: 16),
+          ...habits.map((habit) => _buildHabitCard(context, ref, habit)),
+        ],
+      ),
     );
+  }
+
+  Widget _buildHabitCard(
+    BuildContext context,
+    WidgetRef ref,
+    _RecommendedHabit habit,
+  ) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: isDarkMode
+            ? AppSecondaryColors.gluonGrey.withOpacity(0.1)
+            : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => _addHabit(context, ref, habit),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppSecondaryColors.liquidLava.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        habit.icon,
+                        style: const TextStyle(fontSize: 24),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            habit.title,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            habit.description,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Colors.grey,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.add_circle_outline,
+                      color: AppSecondaryColors.liquidLava,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    _buildInfoChip(
+                      context,
+                      Icons.timer_outlined,
+                      '${habit.targetValue}${habit.targetType == 'duration' ? ' min' : ' times'}',
+                    ),
+                    const SizedBox(width: 8),
+                    _buildInfoChip(
+                      context,
+                      Icons.calendar_today_outlined,
+                      habit.frequency,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildInfoChip(
+                      context,
+                      Icons.trending_up_outlined,
+                      _getDifficultyText(habit.difficulty),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(BuildContext context, IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppSecondaryColors.liquidLava.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 16,
+            color: AppSecondaryColors.liquidLava,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppSecondaryColors.liquidLava,
+                  fontWeight: FontWeight.w500,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getDifficultyText(int difficulty) {
+    switch (difficulty) {
+      case 1:
+        return 'Very Easy';
+      case 2:
+        return 'Easy';
+      case 3:
+        return 'Medium';
+      case 4:
+        return 'Hard';
+      case 5:
+        return 'Very Hard';
+      default:
+        return 'Medium';
+    }
   }
 
   void _addHabit(BuildContext context, WidgetRef ref, _RecommendedHabit habit) {
     final currentHabits = ref.read(habitListProvider).value ?? [];
-
     final isAlreadyAdded = currentHabits.any((h) => h.title == habit.title);
 
     if (isAlreadyAdded) {
@@ -202,6 +411,7 @@ class _RecommendedHabit {
   final int targetValue;
   final String frequency;
   final int difficulty;
+  final String description;
 
   const _RecommendedHabit({
     required this.title,
@@ -210,5 +420,6 @@ class _RecommendedHabit {
     required this.targetValue,
     required this.frequency,
     required this.difficulty,
+    required this.description,
   });
 }

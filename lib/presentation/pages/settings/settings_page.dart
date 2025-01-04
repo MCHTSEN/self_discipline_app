@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:self_discipline_app/core/theme/app_colors.dart';
 import 'package:self_discipline_app/core/utils/logger.dart';
 import 'package:self_discipline_app/presentation/viewmodels/providers.dart';
 import 'package:self_discipline_app/presentation/viewmodels/settings_notifier.dart';
@@ -19,16 +20,58 @@ class SettingsPage extends ConsumerWidget {
     final settings = ref.watch(appSettingsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
-      body: ListView(
-        children: [
-          _buildAppearanceSection(context, ref, settings),
-          _buildPreferencesSection(context, ref, settings),
-          _buildAboutSection(context, settings),
-          _buildLegalSection(context, settings),
-          if (kDebugMode) _buildDebugSection(context, ref),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 120.0,
+            floating: false,
+            pinned: true,
+            centerTitle: true,
+            flexibleSpace: FlexibleSpaceBar(
+              centerTitle: true,
+              titlePadding: const EdgeInsets.only(bottom: 16),
+              title: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(
+                    Icons.settings_outlined,
+                    size: 32,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Settings',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFFFF7F50), // Coral
+                      Color(0xFFFF6B45), // Lighter coral
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverList(
+            delegate: SliverChildListDelegate([
+              _buildAppearanceSection(context, ref, settings),
+              _buildPreferencesSection(context, ref, settings),
+              _buildAboutSection(context, settings),
+              _buildLegalSection(context, settings),
+              if (kDebugMode) _buildDebugSection(context, ref),
+              const SizedBox(height: 20),
+            ]),
+          ),
         ],
       ),
     );
@@ -37,12 +80,14 @@ class SettingsPage extends ConsumerWidget {
   Widget _buildAppearanceSection(
       BuildContext context, WidgetRef ref, AppSettings settings) {
     return _buildSection(
+      context,
       'Appearance',
       [
-        ListTile(
-          title: const Text('Theme'),
-          subtitle: Text(_getThemeText(settings.themeMode)),
-          leading: const Icon(Icons.brightness_6),
+        _buildSettingsTile(
+          context,
+          title: 'Theme',
+          subtitle: _getThemeText(settings.themeMode),
+          icon: Icons.brightness_6,
           onTap: () => _showThemeSelector(context, ref),
         ),
       ],
@@ -52,12 +97,14 @@ class SettingsPage extends ConsumerWidget {
   Widget _buildPreferencesSection(
       BuildContext context, WidgetRef ref, AppSettings settings) {
     return _buildSection(
+      context,
       'Preferences',
       [
-        SwitchListTile(
-          title: const Text('Notifications'),
-          subtitle: const Text('Daily reminders and alerts'),
-          secondary: const Icon(Icons.notifications_outlined),
+        _buildSwitchTile(
+          context,
+          title: 'Notifications',
+          subtitle: 'Daily reminders and alerts',
+          icon: Icons.notifications_outlined,
           value: settings.isNotificationsEnabled,
           onChanged: (value) async {
             await ref
@@ -71,22 +118,26 @@ class SettingsPage extends ConsumerWidget {
 
   Widget _buildAboutSection(BuildContext context, AppSettings settings) {
     return _buildSection(
+      context,
       'About',
       [
-        ListTile(
-          title: const Text('Contact Us'),
-          leading: const Icon(Icons.mail_outline),
+        _buildSettingsTile(
+          context,
+          title: 'Contact Us',
+          icon: Icons.mail_outline,
           onTap: () => _launchURL('mailto:support@example.com'),
         ),
-        ListTile(
-          title: const Text('About App'),
-          subtitle: const Text('Version 1.0.0'),
-          leading: const Icon(Icons.info_outline),
+        _buildSettingsTile(
+          context,
+          title: 'About App',
+          subtitle: 'Version 1.0.0',
+          icon: Icons.info_outline,
           onTap: () => _showAboutDialog(context),
         ),
-        ListTile(
-          title: const Text('Data Usage'),
-          leading: const Icon(Icons.data_usage_outlined),
+        _buildSettingsTile(
+          context,
+          title: 'Data Usage',
+          icon: Icons.data_usage_outlined,
           onTap: () => _showDataUsageInfo(context),
         ),
       ],
@@ -99,16 +150,19 @@ class SettingsPage extends ConsumerWidget {
     const String defaultTermsOfService =
         'https://enshrined-xylophone-794.notion.site/Terms-of-Service-1684dd6a6c7380b2ae91fb917e6bf321';
     return _buildSection(
+      context,
       'Legal',
       [
-        ListTile(
-          title: const Text('Privacy Policy'),
-          leading: const Icon(Icons.privacy_tip_outlined),
+        _buildSettingsTile(
+          context,
+          title: 'Privacy Policy',
+          icon: Icons.privacy_tip_outlined,
           onTap: () => _launchURL(defaultPrivacyPolicy),
         ),
-        ListTile(
-          title: const Text('Terms of Service'),
-          leading: const Icon(Icons.description_outlined),
+        _buildSettingsTile(
+          context,
+          title: 'Terms of Service',
+          icon: Icons.description_outlined,
           onTap: () => _launchURL(defaultTermsOfService),
         ),
       ],
@@ -117,35 +171,205 @@ class SettingsPage extends ConsumerWidget {
 
   Widget _buildDebugSection(BuildContext context, WidgetRef ref) {
     return _buildSection(
+      context,
       'Debug',
       [
-        ListTile(
-          title: const Text('Clear All Data'),
-          subtitle: const Text('Delete all local data'),
-          leading: const Icon(Icons.cleaning_services),
+        _buildSettingsTile(
+          context,
+          title: 'Clear All Data',
+          subtitle: 'Delete all local data',
+          icon: Icons.cleaning_services,
+          isDestructive: true,
           onTap: () => _clearAllData(context, ref),
         ),
       ],
     );
   }
 
-  Widget _buildSection(String title, List<Widget> children) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(
-            title.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.5,
+  Widget _buildSettingsTile(
+    BuildContext context, {
+    required String title,
+    String? subtitle,
+    required IconData icon,
+    required VoidCallback onTap,
+    bool isDestructive = false,
+  }) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: isDestructive
+                    ? Colors.red.withOpacity(0.1)
+                    : AppSecondaryColors.liquidLava.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color:
+                    isDestructive ? Colors.red : AppSecondaryColors.liquidLava,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: isDestructive ? Colors.red : null,
+                        ),
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: isDarkMode
+                                ? Colors.grey[400]
+                                : Colors.grey[600],
+                          ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSwitchTile(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppSecondaryColors.liquidLava.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: AppSecondaryColors.liquidLava,
+              size: 22,
             ),
           ),
-        ),
-        ...children,
-      ],
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                      ),
+                ),
+              ],
+            ),
+          ),
+          Switch.adaptive(
+            value: value,
+            onChanged: onChanged,
+            activeColor: AppSecondaryColors.liquidLava,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection(
+      BuildContext context, String title, List<Widget> children) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
+            child: Text(
+              title.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+                color: AppSecondaryColors.dustyGrey,
+              ),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey[900]
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.black.withOpacity(0.3)
+                      : Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: children.map((child) {
+                final index = children.indexOf(child);
+                if (index != children.length - 1) {
+                  return Column(
+                    children: [
+                      child,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Divider(
+                          height: 1,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.grey[800]
+                              : Colors.grey[300],
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                return child;
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
