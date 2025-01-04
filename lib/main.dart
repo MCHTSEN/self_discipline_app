@@ -17,7 +17,7 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(appSettingsProvider);
+    final themeMode = ref.watch(appThemeProvider);
     final router = AppRouter();
 
     return MaterialApp.router(
@@ -25,7 +25,7 @@ class MyApp extends ConsumerWidget {
       title: 'Self Discipline',
       theme: AppTheme.lightTheme(),
       darkTheme: AppTheme.darkTheme(),
-      themeMode: settings.themeMode,
+      themeMode: themeMode,
       routerConfig: router.config(),
     );
   }

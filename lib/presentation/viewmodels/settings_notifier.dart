@@ -2,6 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 
+// App-level settings that affect the entire app
+final appThemeProvider = StateProvider<ThemeMode>((ref) {
+  final settings = ref.watch(appSettingsProvider);
+  return settings.themeMode;
+});
+
+final appLanguageProvider = StateProvider<String>((ref) {
+  final settings = ref.watch(appSettingsProvider);
+  return settings.language;
+});
+
 final appSettingsProvider =
     StateNotifierProvider<SettingsNotifier, AppSettings>((ref) {
   final box = ref.watch(settingsBoxProvider);
