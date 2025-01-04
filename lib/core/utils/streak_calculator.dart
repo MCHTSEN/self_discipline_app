@@ -1,4 +1,3 @@
-import 'package:self_discipline_app/domain/entities/habit_entity.dart';
 
 class StreakCalculator {
   /// Calculates the current streak for a habit based on its completions and frequency

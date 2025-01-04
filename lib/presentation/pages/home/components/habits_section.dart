@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:self_discipline_app/core/constants/paddings.dart';
 import 'package:self_discipline_app/core/helper/gap.dart';
 import 'package:self_discipline_app/core/theme/app_colors.dart';
 import 'package:self_discipline_app/domain/entities/habit_entity.dart';

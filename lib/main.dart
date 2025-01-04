@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:self_discipline_app/core/router/app_router.dart';
 import 'package:self_discipline_app/core/services/app_initializer.dart';
 import 'package:self_discipline_app/core/theme/app_theme.dart';
-import 'package:self_discipline_app/presentation/viewmodels/providers.dart';
 import 'package:self_discipline_app/presentation/viewmodels/settings_notifier.dart';
-import 'package:device_preview/device_preview.dart';
 
 void main() async {
   final overrides = await AppInitializer.initialize();

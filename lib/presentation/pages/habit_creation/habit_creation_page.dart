@@ -1,11 +1,9 @@
 // lib/presentation/pages/habit_creation_page.dart
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:self_discipline_app/core/helper/keyboard_unfocus.dart';
 import 'package:self_discipline_app/domain/entities/habit_entity.dart';
-import 'package:self_discipline_app/presentation/viewmodels/create_habit_notifier.dart';
 import 'package:self_discipline_app/presentation/viewmodels/habit_list_notifier.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
@@ -27,7 +25,6 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
   int _targetDuration = 30;
   int _targetQuantity = 1;
   bool _isCustomTarget = false;
-  int _targetRepetition = 1;
   String _frequency = 'daily';
   List<int>? _customDays;
   TimeOfDay _notificationTime = const TimeOfDay(hour: 8, minute: 0);
@@ -93,85 +90,203 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
     );
   }
 
-  Widget _buildTargetSelector() {
-    return Column(
-      children: [
-        _buildSection(
-          title: 'TARGET TYPE',
-          child: SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(
-                value: 'duration',
-                label: Text('Duration'),
-                icon: Icon(Icons.timer),
-              ),
-              ButtonSegment(
-                value: 'quantity',
-                label: Text('Quantity'),
-                icon: Icon(Icons.format_list_numbered),
-              ),
-            ],
-            selected: {_targetType},
-            onSelectionChanged: (Set<String> newSelection) {
-              setState(() {
-                _targetType = newSelection.first;
-                _isCustomTarget = false;
-              });
-            },
+  Widget _buildSection({required String title, required Widget child}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
           ),
-        ),
-        _buildSection(
-          title: _targetType == 'duration' ? 'DURATION' : 'QUANTITY',
-          child: SizedBox(
-            height: 40,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                ...(_targetType == 'duration'
-                        ? predefinedDurations
-                        : predefinedQuantities)
-                    .map((value) => Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: ChoiceChip(
-                            label: Text(_targetType == 'duration'
-                                ? '$value min'
-                                : value.toString()),
-                            selected: !_isCustomTarget &&
-                                (_targetType == 'duration'
-                                    ? _targetDuration == value
-                                    : _targetQuantity == value),
-                            onSelected: (selected) {
-                              setState(() {
-                                _isCustomTarget = false;
-                                if (_targetType == 'duration') {
-                                  _targetDuration = value;
-                                } else {
-                                  _targetQuantity = value;
-                                }
-                              });
-                            },
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+              ),
+              if (title == 'TARGET') ...[
+                const SizedBox(width: 16),
+                Expanded(
+                  child: SizedBox(
+                    height: 32,
+                    child: CupertinoSegmentedControl<String>(
+                      children: const {
+                        'duration': Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.timer, size: 16),
+                              SizedBox(width: 4),
+                              Text('Duration'),
+                            ],
                           ),
-                        )),
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: const Text('Custom'),
-                    selected: _isCustomTarget,
-                    onSelected: (selected) {
-                      setState(() {
-                        _isCustomTarget = selected;
-                        if (selected) {
-                          _showCustomTargetPicker();
-                        }
-                      });
-                    },
+                        ),
+                        'quantity': Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.format_list_numbered, size: 16),
+                              SizedBox(width: 4),
+                              Text('Quantity'),
+                            ],
+                          ),
+                        ),
+                      },
+                      groupValue: _targetType,
+                      onValueChanged: (String value) {
+                        setState(() {
+                          _targetType = value;
+                          _isCustomTarget = false;
+                        });
+                      },
+                    ),
                   ),
                 ),
               ],
+            ],
+          ),
+          const SizedBox(height: 16),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIconSelector() {
+    return _buildSection(
+      title: 'TITLE & ICON',
+      child: TextFormField(
+        decoration: InputDecoration(
+          hintText: 'Enter habit title',
+          filled: true,
+          fillColor: Theme.of(context).colorScheme.surface,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          isDense: true,
+          suffixIcon: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: _showEmojiPicker,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                _iconPath,
+                style: const TextStyle(fontSize: 24),
+              ),
             ),
           ),
         ),
-      ],
+        validator: (value) =>
+            value?.isEmpty ?? true ? 'Title is required' : null,
+        onSaved: (value) => _title = value ?? '',
+      ),
+    );
+  }
+
+  Widget _buildTargetSelector() {
+    return _buildSection(
+      title: 'TARGET',
+      child: SizedBox(
+        height: 32,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: [
+            ...(_targetType == 'duration'
+                    ? predefinedDurations
+                    : predefinedQuantities)
+                .map((value) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 0),
+                        labelStyle: TextStyle(
+                          fontSize: 13,
+                          color: !_isCustomTarget &&
+                                  (_targetType == 'duration'
+                                      ? _targetDuration == value
+                                      : _targetQuantity == value)
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).colorScheme.onSurface,
+                        ),
+                        label: Text(
+                          _targetType == 'duration'
+                              ? '$value min'
+                              : value.toString(),
+                        ),
+                        selected: !_isCustomTarget &&
+                            (_targetType == 'duration'
+                                ? _targetDuration == value
+                                : _targetQuantity == value),
+                        selectedColor: Theme.of(context).colorScheme.primary,
+                        backgroundColor: Theme.of(context).colorScheme.surface,
+                        onSelected: (selected) {
+                          setState(() {
+                            _isCustomTarget = false;
+                            if (_targetType == 'duration') {
+                              _targetDuration = value;
+                            } else {
+                              _targetQuantity = value;
+                            }
+                          });
+                        },
+                      ),
+                    )),
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ChoiceChip(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                labelStyle: TextStyle(
+                  fontSize: 13,
+                  color: _isCustomTarget
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Theme.of(context).colorScheme.onSurface,
+                ),
+                label: const Text('Custom'),
+                selected: _isCustomTarget,
+                selectedColor: Theme.of(context).colorScheme.primary,
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                onSelected: (selected) {
+                  setState(() {
+                    _isCustomTarget = selected;
+                    if (selected) {
+                      _showCustomTargetPicker();
+                    }
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -247,28 +362,48 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
   Widget _buildFrequencySelector() {
     return _buildSection(
       title: 'FREQUENCY',
-      child: SizedBox(
-        height: 40,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: frequencies
-              .map((freq) => Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(freq.capitalize()),
-                      selected: _frequency == freq,
-                      onSelected: (selected) {
-                        setState(() {
-                          _frequency = freq;
-                          if (freq != 'custom') {
-                            _customDays = null;
-                          }
-                        });
-                      },
-                    ),
-                  ))
-              .toList(),
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 32,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: frequencies
+                  .map((freq) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ChoiceChip(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 0),
+                          labelStyle: TextStyle(
+                            fontSize: 13,
+                            color: _frequency == freq
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.onSurface,
+                          ),
+                          label: Text(freq.capitalize()),
+                          selected: _frequency == freq,
+                          selectedColor: Theme.of(context).colorScheme.primary,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.surface,
+                          onSelected: (selected) {
+                            if (freq == 'custom' && selected) {
+                              _showCustomDaysDialog();
+                            } else {
+                              setState(() {
+                                _frequency = freq;
+                                if (freq != 'custom') {
+                                  _customDays = null;
+                                }
+                              });
+                            }
+                          },
+                        ),
+                      ))
+                  .toList(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -389,108 +524,8 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
       );
 
       ref.read(habitListProvider.notifier).addHabit(habit);
-      context.router.pop();
+      context.router.maybePop();
     }
-  }
-
-  Widget _buildSection({required String title, required Widget child}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 8),
-        child,
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-
-  Widget _buildTitleField() {
-    return _buildSection(
-      title: 'TITLE',
-      child: TextFormField(
-        decoration: const InputDecoration(
-          hintText: 'Enter habit title',
-          isDense: true,
-          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        ),
-        validator: (value) =>
-            value?.isEmpty ?? true ? 'Title is required' : null,
-        onSaved: (value) => _title = value ?? '',
-      ),
-    );
-  }
-
-  void _showEmojiPicker() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return SizedBox(
-          height: 250,
-          child: EmojiPicker(
-            onEmojiSelected: (category, emoji) {
-              setState(() {
-                _iconPath = emoji.emoji;
-              });
-              Navigator.pop(context);
-            },
-            config: Config(
-              columns: 7,
-              emojiSizeMax: 32.0,
-              verticalSpacing: 0,
-              horizontalSpacing: 0,
-              initCategory: Category.SMILEYS,
-              bgColor: Theme.of(context).scaffoldBackgroundColor,
-              indicatorColor: Theme.of(context).primaryColor,
-              iconColor: Colors.grey,
-              iconColorSelected: Theme.of(context).primaryColor,
-              backspaceColor: Theme.of(context).primaryColor,
-              skinToneDialogBgColor: Colors.white,
-              skinToneIndicatorColor: Colors.grey,
-              enableSkinTones: true,
-              recentsLimit: 28,
-              noRecents: const Text('No Recents'),
-              tabIndicatorAnimDuration: kTabScrollDuration,
-              categoryIcons: const CategoryIcons(),
-              buttonMode: ButtonMode.MATERIAL,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildIconSelector() {
-    return _buildSection(
-      title: 'TITLE & ICON',
-      child: TextFormField(
-        decoration: InputDecoration(
-          hintText: 'Enter habit title',
-          isDense: true,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          suffixIcon: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: _showEmojiPicker,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                _iconPath,
-                style: const TextStyle(fontSize: 24),
-              ),
-            ),
-          ),
-        ),
-        validator: (value) =>
-            value?.isEmpty ?? true ? 'Title is required' : null,
-        onSaved: (value) => _title = value ?? '',
-      ),
-    );
   }
 
   Widget _buildNotificationTime() {
@@ -570,6 +605,45 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
                 ),
               ),
             ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showEmojiPicker() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SizedBox(
+          height: 250,
+          child: EmojiPicker(
+            onEmojiSelected: (category, emoji) {
+              setState(() {
+                _iconPath = emoji.emoji;
+              });
+              Navigator.pop(context);
+            },
+            config: Config(
+              columns: 7,
+              emojiSizeMax: 32.0,
+              verticalSpacing: 0,
+              horizontalSpacing: 0,
+              initCategory: Category.SMILEYS,
+              bgColor: Theme.of(context).scaffoldBackgroundColor,
+              indicatorColor: Theme.of(context).primaryColor,
+              iconColor: Colors.grey,
+              iconColorSelected: Theme.of(context).primaryColor,
+              backspaceColor: Theme.of(context).primaryColor,
+              skinToneDialogBgColor: Colors.white,
+              skinToneIndicatorColor: Colors.grey,
+              enableSkinTones: true,
+              recentsLimit: 28,
+              noRecents: const Text('No Recents'),
+              tabIndicatorAnimDuration: kTabScrollDuration,
+              categoryIcons: const CategoryIcons(),
+              buttonMode: ButtonMode.MATERIAL,
+            ),
           ),
         );
       },
