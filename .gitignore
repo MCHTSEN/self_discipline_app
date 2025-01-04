@@ -13,6 +13,8 @@
 migrate_working_dir/
 .DS_Store
 .cursorrules
+project_progress.md
+PRD.md
 
 # IntelliJ related
 *.iml

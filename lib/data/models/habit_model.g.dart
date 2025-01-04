@@ -26,7 +26,7 @@ class HabitModelAdapter extends TypeAdapter<HabitModel> {
       customDays: (fields[6] as List?)?.cast<int>(),
       notificationTime: fields[7] as DateTime?,
       difficulty: fields[8] as int,
-      completions: (fields[9] as List?)?.cast<DateTime>() ?? [],
+      completions: (fields[9] as List).cast<DateTime>(),
       currentStreak: fields[10] as int,
       bestStreak: fields[11] as int,
     );

@@ -12,11 +12,11 @@ class MainPage extends StatelessWidget {
     Logger.pageBuild('MainPage');
     return AutoTabsScaffold(
       backgroundColor: Colors.transparent,
-      routes: const [
-        HomeRoute(),
-        HabitRecommendationRoute(),
-        StatsRoute(),
-        SettingsRoute(),
+      routes: [
+        const HomeRoute(),
+        const HabitRecommendationRoute(),
+        const StatsRoute(),
+        const SettingsRoute(),
       ],
       bottomNavigationBuilder: (context, tabsRouter) {
         return Container(
