@@ -8,6 +8,8 @@ import 'package:self_discipline_app/domain/usecases/create_habit_usecase.dart';
 import 'package:self_discipline_app/domain/usecases/delete_habit_usecase.dart';
 import 'package:self_discipline_app/domain/usecases/get_habits_usecase.dart';
 import 'package:self_discipline_app/domain/usecases/update_habit_usecase.dart';
+import 'package:self_discipline_app/domain/entities/daily_streak_entity.dart';
+import 'package:self_discipline_app/presentation/viewmodels/streak_notifier.dart';
 
 // Hive Boxes
 final habitBoxProvider = Provider<Box<HabitModel>>((ref) {
@@ -49,4 +51,9 @@ final updateHabitUseCaseProvider = Provider<UpdateHabitUseCase>((ref) {
 final deleteHabitUseCaseProvider = Provider<DeleteHabitUseCase>((ref) {
   final repository = ref.watch(habitRepositoryProvider);
   return DeleteHabitUseCase(repository);
+});
+
+final streakProvider =
+    StateNotifierProvider<StreakNotifier, List<DailyStreakEntity>>((ref) {
+  return StreakNotifier();
 });
