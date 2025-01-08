@@ -29,6 +29,9 @@ enum ProjectRadiusType {
 
   BorderRadiusGeometry get topLeftRightRadius => BorderRadius.only(
       topLeft: Radius.circular(value), topRight: Radius.circular(value));
+
+  BorderRadiusGeometry get bottomLeftRightRadius => BorderRadius.only(  
+      bottomLeft: Radius.circular(value), bottomRight: Radius.circular(value));
 }
 
 enum ProjectPaddingType {
