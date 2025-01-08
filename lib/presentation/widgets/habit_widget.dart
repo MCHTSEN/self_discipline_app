@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:self_discipline_app/core/helper/gap.dart';
 import 'package:self_discipline_app/core/theme/app_colors.dart';
 import 'package:self_discipline_app/domain/entities/habit_entity.dart';
@@ -67,7 +68,7 @@ class HabitWidget extends StatelessWidget {
         trailing: IconButton(
           icon: Icon(
             isCompleted ? Icons.check_circle : Icons.check_circle_outline,
-            color: isCompleted ? AppSecondaryColors.dustyGrey : null,
+            color: isCompleted ? Color.fromARGB(255, 255, 109, 255) : null,
           ),
           onPressed: isCompleted ? onUncomplete : onComplete,
         ),
@@ -75,10 +76,35 @@ class HabitWidget extends StatelessWidget {
     );
   }
 
-  Text _title(BuildContext context) {
-    return Text(habit.title,
-        style:
-            Theme.of(context).textTheme.headlineSmall!.copyWith(fontSize: 16));
+  Row _title(BuildContext context) {
+    final habitFrequencyString = habit.frequency == 'daily'
+        ? 'Günlük'
+        : habit.frequency == 'weekly'
+            ? 'Haftalık'
+            : 'Ozel';
+
+    return Row(
+      children: [
+        Flexible(
+          // İlk text'i Flexible ile sardık
+          child: Text(
+            habit.title,
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall!
+                .copyWith(fontSize: 14),
+          ),
+        ),
+        Gap.low,
+        Container(height: 10, width: 1, color: Colors.grey),
+        Gap.low,
+        Icon(Icons.repeat, size: 11.sp),
+        Flexible(
+          child: Text(' $habitFrequencyString olarak yenilenir',
+              style: TextStyle(fontSize: 11.sp)),
+        ),
+      ],
+    );
   }
 
   Text _habitIcon() {

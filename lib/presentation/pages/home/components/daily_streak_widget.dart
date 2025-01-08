@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:self_discipline_app/core/constants/paddings.dart';
+import 'package:self_discipline_app/core/helper/gap.dart';
 import 'package:self_discipline_app/core/theme/app_colors.dart';
 import 'package:self_discipline_app/presentation/viewmodels/habit_list_notifier.dart';
 
@@ -75,42 +78,6 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
     );
   }
 
-  /// Kontrol: Belirli bir tarihte (date) var olan tüm habit'ler tamamlanmış mı?
-  bool _isDateCompleted(DateTime date) {
-    final habitsState = ref.watch(habitListProvider);
-    return habitsState.when(
-      data: (habits) {
-        if (habits.isEmpty) return false;
-
-        // Sadece date tarihinden önce ya da aynı gün oluşturulmuş habit'leri kontrol ediyoruz
-        final habitsExistingOnDate = habits.where((habit) {
-          // createdAt, habit'in ne zaman oluşturulduğunu tutar
-          return habit.createdAt.isBefore(date) ||
-              _isSameDay(habit.createdAt, date);
-        }).toList();
-
-        // O güne kadar henüz hiç habit oluşturulmamışsa false dönelim
-        if (habitsExistingOnDate.isEmpty) return false;
-
-        // Bu tarihe kadar var olan habit'lerin hepsinde, date günü bir completion var mı?
-        return habitsExistingOnDate.every(
-          (habit) => habit.completions.any(
-            (completion) =>
-                completion.year == date.year &&
-                completion.month == date.month &&
-                completion.day == date.day,
-          ),
-        );
-      },
-      loading: () => false,
-      error: (_, __) => false,
-    );
-  }
-
-  bool _isSameDay(DateTime d1, DateTime d2) {
-    return d1.year == d2.year && d1.month == d2.month && d1.day == d2.day;
-  }
-
   /// Haftalık görünümdeki günleri hesaplar
   List<DateTime> _getDaysInWeek(int week) {
     final List<DateTime> days = [];
@@ -135,89 +102,110 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final dayWidth = (screenWidth - 130) / 7;
+    final dayWidth = (screenWidth - 150) / 7;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final habitState = ref.watch(habitListProvider.notifier);
+    final Color firstColor = Colors.black;
+    final Color secondaryColor = Colors.grey[700]!;
+    final currentMonrh = DateFormat('MMMM').format(currentDate);
 
-    return SizedBox(
-      height: 70,
+    return Container(
+      width: double.infinity,
+      height: 80,
       child: PageView.builder(
         controller: _pageController,
         itemCount: totalWeeks,
         itemBuilder: (context, weekIndex) {
           final weekDays = _getDaysInWeek(weekIndex);
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: weekDays.map((date) {
-              final bool isCompleted = _isDateCompleted(date);
-              final bool isCurrentDay = date.day == currentDate.day &&
-                  date.month == currentDate.month;
-              final bool isCurrentMonth = date.month == currentDate.month;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: weekDays.map((date) {
+                  final bool isCompleted = habitState.isDateCompleted(date);
+                  final bool isCurrentDay = date.day == currentDate.day &&
+                      date.month == currentDate.month;
+                  final bool isCurrentMonth = date.month == currentDate.month;
 
-              return Container(
-                width: dayWidth,
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                margin: const EdgeInsets.symmetric(horizontal: 1),
-                decoration: BoxDecoration(
-                  color: isCurrentDay
+                  final cardColor = (isCurrentDay)
                       ? Colors.white
-                      : isCompleted
-                          ? Color(0xffffbe0b)
-                          : isDarkMode
-                              ? Color(0xff283618)
-                              : Colors.white.withOpacity(.3),
-                  borderRadius: ProjectRadiusType.largeRadius.allRadius,
-                  border: Border.all(
-                    color: isCurrentDay
-                        ? Colors.white
-                        : isCompleted
-                            ? Colors.white
-                            : Colors.transparent,
-                    width: 1,
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    isCompleted
-                        ? const Text(
-                            '🔥',
-                            style: TextStyle(fontSize: 14),
-                          )
-                        : Container(
-                            width: 12,
-                            height: 12,
-                            margin: const EdgeInsets.symmetric(vertical: 2),
-                            decoration: BoxDecoration(
-                              color: isCurrentDay
-                                  ? Color(0xfffb5607)
-                                  : isDarkMode
-                                      ? Color(0xff606c38)
-                                      : Colors.grey[100],
-                              shape: BoxShape.circle,
+                      : Colors.transparent;
+
+                  final borderColor =
+                      isCurrentDay ? Colors.grey : Colors.transparent;
+
+                  final dayTextColor = isCompleted
+                      ? Colors.white
+                      : isCurrentDay
+                          ? Colors.red
+                          : secondaryColor;
+
+                  final dayNumberTextColor =
+                      isCompleted ? Colors.white : secondaryColor;
+
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: dayWidth,
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        decoration: BoxDecoration(
+                          gradient: isCompleted
+                              ? LinearGradient(
+                                  colors: [
+                                    const Color.fromARGB(255, 234, 15, 245)
+                                        .withOpacity(.3),
+                                    const Color.fromARGB(255, 157, 15, 245)
+                                        .withOpacity(.6),
+                                  ],
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                )
+                              : null,
+                          color: isCompleted ? null : cardColor,
+                          borderRadius:
+                              ProjectRadiusType.normalRadius.allRadius,
+                          border: Border.all(color: borderColor, width: 0.6),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              // "6\nTue" format
+                              DateFormat('d').format(date),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                color: dayNumberTextColor,
+                                fontWeight: isCurrentMonth
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
                             ),
-                          ),
-                    Text(
-                      // "6\nTue" format
-                      DateFormat('d\nEEE').format(date),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: isCurrentMonth
-                            ? isDarkMode
-                                ? Colors.white
-                                : Colors.black
-                            : isDarkMode
-                                ? Colors.white.withOpacity(0.6)
-                                : Colors.black.withOpacity(0.6),
-                        fontWeight: isCurrentMonth
-                            ? FontWeight.bold
-                            : FontWeight.normal,
+                            Text(
+                              // "6\nTue" format
+                              DateFormat('EEE').format(date).toUpperCase(),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: dayTextColor,
+                                fontWeight: isCurrentMonth
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList(),
+                      SizedBox(
+                        width: 2,
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ],
           );
         },
       ),

@@ -9,7 +9,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       primaryColor: AppSecondaryColors.liquidLava,
-      scaffoldBackgroundColor: AppSecondaryColors.snow,
+      scaffoldBackgroundColor:  Colors.black.withOpacity(.04),
       textTheme: AppTextStyles.lightTheme,
 
       // AppBar theme

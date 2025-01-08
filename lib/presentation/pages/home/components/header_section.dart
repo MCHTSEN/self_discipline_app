@@ -9,7 +9,7 @@ class HeaderSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final thisMonth = DateFormat.MMMM().format(DateTime.now());
+    final habitListState = ref.watch(habitListProvider.notifier);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -60,7 +60,7 @@ class HeaderSection extends ConsumerWidget {
                     ),
                     Gap.extraLow,
                     Text(
-                      '7 Days',
+                      habitListState.currentStreak.toString(),
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
