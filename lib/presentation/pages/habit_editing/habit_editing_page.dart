@@ -1,4 +1,3 @@
-// lib/presentation/pages/habit_creation_page.dart
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,33 +7,32 @@ import 'package:self_discipline_app/core/helper/gap.dart';
 import 'package:self_discipline_app/core/helper/keyboard_unfocus.dart';
 import 'package:self_discipline_app/core/theme/app_colors.dart';
 import 'package:self_discipline_app/domain/entities/habit_entity.dart';
-import 'package:self_discipline_app/presentation/viewmodels/create_habit_notifier.dart';
 import 'package:self_discipline_app/presentation/viewmodels/habit_list_notifier.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 
 @RoutePage()
-class HabitCreationPage extends ConsumerStatefulWidget {
-  const HabitCreationPage({super.key});
+class HabitEditingPage extends ConsumerStatefulWidget {
+  final HabitEntity habit;
+
+  const HabitEditingPage({super.key, required this.habit});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() =>
-      _HabitCreationPageState();
+  ConsumerState<HabitEditingPage> createState() => _HabitEditingPageState();
 }
 
-class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
+class _HabitEditingPageState extends ConsumerState<HabitEditingPage> {
   final _formKey = GlobalKey<FormState>();
-  String _title = '';
-  String _iconPath = '🎯';
-  String _targetType = 'duration';
-  int _targetDuration = 30;
-  int _targetQuantity = 1;
-  bool _isCustomTarget = false;
-  int _targetRepetition = 1;
-  String _frequency = 'daily';
-  List<int>? _customDays;
-  TimeOfDay _notificationTime = const TimeOfDay(hour: 8, minute: 0);
-  int _difficulty = 3;
+  late String _title;
+  late String _iconPath;
+  late String _targetType;
+  late int _targetDuration;
+  late int _targetQuantity;
+  late bool _isCustomTarget;
+  late String _frequency;
+  late List<int>? _customDays;
+  late TimeOfDay _notificationTime;
+  late int _difficulty;
 
   static const List<int> predefinedDurations = [15, 30, 45, 60, 90];
   static const List<int> predefinedQuantities = [1, 2, 3, 5, 10];
@@ -44,6 +42,23 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
     'monthly',
     'custom'
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _title = widget.habit.title;
+    _iconPath = widget.habit.iconPath;
+    _targetType = widget.habit.targetType;
+    _targetDuration = widget.habit.targetValue;
+    _targetQuantity = widget.habit.targetValue;
+    _isCustomTarget = !predefinedDurations.contains(widget.habit.targetValue) &&
+        !predefinedQuantities.contains(widget.habit.targetValue);
+    _frequency = widget.habit.frequency;
+    _customDays = widget.habit.customDays;
+    _notificationTime =
+        TimeOfDay.fromDateTime(widget.habit.notificationTime ?? DateTime.now());
+    _difficulty = widget.habit.difficulty;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +154,7 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
                 icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
               ),
               Text(
-                'Create New Habit',
+                'Edit Habit',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -158,13 +173,13 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(
-                  Icons.tips_and_updates_rounded,
+                  Icons.edit,
                   color: Colors.white,
                   size: 16,
                 ),
                 Gap.extraLow,
                 Text(
-                  'Start small, dream big!',
+                  'Make it better!',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w500,
@@ -173,6 +188,98 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  void _saveHabit() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      final updatedHabit = HabitEntity(
+        id: widget.habit.id,
+        title: _title,
+        iconPath: _iconPath,
+        targetType: _targetType,
+        targetValue:
+            _targetType == 'duration' ? _targetDuration : _targetQuantity,
+        frequency: _frequency,
+        customDays: _customDays,
+        notificationTime: DateTime(
+          DateTime.now().year,
+          DateTime.now().month,
+          DateTime.now().day,
+          _notificationTime.hour,
+          _notificationTime.minute,
+        ),
+        difficulty: _difficulty,
+        createdAt: widget.habit.createdAt,
+        completions: widget.habit.completions,
+        currentStreak: widget.habit.currentStreak,
+        bestStreak: widget.habit.bestStreak,
+      );
+
+      ref.read(habitListProvider.notifier).modifyHabit(updatedHabit);
+      context.router.pop();
+    }
+  }
+
+  Widget _buildSaveButton() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: ElevatedButton(
+        onPressed: _saveHabit,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppSecondaryColors.liquidLava,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 4,
+        ),
+        child: const Text(
+          'Save Changes',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCard({
+    required String title,
+    required Widget child,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          Gap.low,
+          child,
         ],
       ),
     );
@@ -241,7 +348,7 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
                       child: ChoiceChip(
                         label: Text(
                           _targetType == 'duration'
-                              ? '${value}m'
+                              ? '$value min'
                               : value.toString(),
                         ),
                         selected: !_isCustomTarget &&
@@ -346,6 +453,175 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
     );
   }
 
+  Widget _buildDifficultyCard() {
+    return _buildCard(
+      title: 'DIFFICULTY',
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(5, (index) {
+              return GestureDetector(
+                onTap: () => setState(() => _difficulty = index + 1),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: _difficulty >= index + 1
+                        ? AppSecondaryColors.liquidLava
+                        : Colors.grey.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '${index + 1}',
+                    style: TextStyle(
+                      color:
+                          _difficulty >= index + 1 ? Colors.white : Colors.grey,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+          Gap.low,
+          Text(
+            _getDifficultyLabel(),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getDifficultyLabel() {
+    switch (_difficulty) {
+      case 1:
+        return 'Very Easy';
+      case 2:
+        return 'Easy';
+      case 3:
+        return 'Moderate';
+      case 4:
+        return 'Hard';
+      case 5:
+        return 'Very Hard';
+      default:
+        return '';
+    }
+  }
+
+  Widget _buildCustomDaysSelector() {
+    return _buildCard(
+      title: 'CUSTOM DAYS',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: List.generate(31, (index) {
+              final day = index + 1;
+              return FilterChip(
+                label: Text(day.toString()),
+                selected: _customDays?.contains(day) ?? false,
+                onSelected: (selected) {
+                  setState(() {
+                    if (_customDays == null) {
+                      _customDays = [];
+                    }
+                    if (selected) {
+                      _customDays!.add(day);
+                    } else {
+                      _customDays!.remove(day);
+                    }
+                    _customDays!.sort();
+                  });
+                },
+                selectedColor: AppSecondaryColors.liquidLava.withOpacity(0.2),
+                checkmarkColor: AppSecondaryColors.liquidLava,
+              );
+            }),
+          ),
+          if (_customDays != null && _customDays!.isNotEmpty) ...[
+            Gap.normal,
+            Text(
+              'Selected days: ${_customDays!.join(", ")}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  void _showCustomTargetPicker() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: 280,
+          padding: const EdgeInsets.only(top: 6),
+          child: Column(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Done'),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: CupertinoPicker(
+                  magnification: 1.22,
+                  squeeze: 1.2,
+                  useMagnifier: true,
+                  itemExtent: 32,
+                  scrollController: FixedExtentScrollController(
+                    initialItem: _targetType == 'duration'
+                        ? _targetDuration - 1
+                        : _targetQuantity - 1,
+                  ),
+                  onSelectedItemChanged: (int selectedItem) {
+                    setState(() {
+                      if (_targetType == 'duration') {
+                        _targetDuration = selectedItem + 1;
+                      } else {
+                        _targetQuantity = selectedItem + 1;
+                      }
+                    });
+                  },
+                  children: List<Widget>.generate(
+                    _targetType == 'duration' ? 180 : 100,
+                    (int index) {
+                      final value = index + 1;
+                      return Center(
+                        child: Text(
+                          _targetType == 'duration'
+                              ? '$value minutes'
+                              : value.toString(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _showNotificationPicker() {
     showCupertinoModalPopup<void>(
       context: context,
@@ -426,290 +702,27 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
     );
   }
 
-  Widget _buildDifficultyCard() {
-    return _buildCard(
-      title: 'DIFFICULTY',
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(5, (index) {
-              return GestureDetector(
-                onTap: () => setState(() => _difficulty = index + 1),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: _difficulty >= index + 1
-                        ? AppSecondaryColors.liquidLava
-                        : Colors.grey.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    '${index + 1}',
-                    style: TextStyle(
-                      color:
-                          _difficulty >= index + 1 ? Colors.white : Colors.grey,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-          Gap.low,
-          Text(
-            _getDifficultyLabel(),
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getDifficultyLabel() {
-    switch (_difficulty) {
-      case 1:
-        return 'Very Easy';
-      case 2:
-        return 'Easy';
-      case 3:
-        return 'Moderate';
-      case 4:
-        return 'Hard';
-      case 5:
-        return 'Very Hard';
-      default:
-        return '';
-    }
-  }
-
-  Widget _buildCard({
-    required String title,
-    required Widget child,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Colors.grey,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-          Gap.low,
-          child,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSaveButton() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: ElevatedButton(
-        onPressed: _saveHabit,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppSecondaryColors.liquidLava,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          elevation: 4,
-        ),
-        child: const Text(
-          'Create Habit',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCustomDaysSelector() {
-    return _buildCard(
-      title: 'CUSTOM DAYS',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: List.generate(31, (index) {
-              final day = index + 1;
-              return FilterChip(
-                label: Text(day.toString()),
-                selected: _customDays?.contains(day) ?? false,
-                onSelected: (selected) {
-                  setState(() {
-                    if (_customDays == null) {
-                      _customDays = [];
-                    }
-                    if (selected) {
-                      _customDays!.add(day);
-                    } else {
-                      _customDays!.remove(day);
-                    }
-                    _customDays!.sort();
-                  });
-                },
-                selectedColor: AppSecondaryColors.liquidLava.withOpacity(0.2),
-                checkmarkColor: AppSecondaryColors.liquidLava,
-              );
-            }),
-          ),
-          if (_customDays != null && _customDays!.isNotEmpty) ...[
-            Gap.normal,
-            Text(
-              'Selected days: ${_customDays!.join(", ")}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  void _showCustomTargetPicker() {
-    int initialValue =
-        _targetType == 'duration' ? _targetDuration : _targetQuantity;
-
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 280,
-          padding: const EdgeInsets.only(top: 6),
-          child: Column(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Done'),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: CupertinoPicker(
-                  magnification: 1.22,
-                  squeeze: 1.2,
-                  useMagnifier: true,
-                  itemExtent: 32,
-                  scrollController: FixedExtentScrollController(
-                    initialItem: initialValue - 1,
-                  ),
-                  onSelectedItemChanged: (int selectedItem) {
-                    setState(() {
-                      if (_targetType == 'duration') {
-                        _targetDuration = selectedItem + 1;
-                      } else {
-                        _targetQuantity = selectedItem + 1;
-                      }
-                    });
-                  },
-                  children: List<Widget>.generate(
-                    _targetType == 'duration' ? 180 : 100, // max values
-                    (int index) {
-                      final value = index + 1;
-                      return Center(
-                        child: Text(
-                          _targetType == 'duration'
-                              ? '$value minutes'
-                              : value.toString(),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _saveHabit() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-
-      final habit = HabitEntity(
-        id: DateTime.now().toIso8601String(),
-        title: _title,
-        iconPath: _iconPath,
-        targetType: _targetType,
-        targetValue:
-            _targetType == 'duration' ? _targetDuration : _targetQuantity,
-        frequency: _frequency,
-        customDays: _customDays,
-        notificationTime: DateTime(
-          DateTime.now().year,
-          DateTime.now().month,
-          DateTime.now().day,
-          _notificationTime.hour,
-          _notificationTime.minute,
-        ),
-        difficulty: _difficulty,
-        createdAt: DateTime.now(),
-      );
-
-      ref.read(habitListProvider.notifier).addHabit(habit);
-      context.router.pop();
-    }
-  }
-
-  Widget _buildSection({required String title, required Widget child}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 8),
-        child,
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-
-  Widget _buildTitleField() {
+  Widget _buildIconSelector() {
     return _buildSection(
-      title: 'TITLE',
+      title: 'TITLE & ICON',
       child: TextFormField(
-        decoration: const InputDecoration(
+        initialValue: _title,
+        decoration: InputDecoration(
           hintText: 'Enter habit title',
           isDense: true,
-          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          suffixIcon: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: _showEmojiPicker,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                _iconPath,
+                style: const TextStyle(fontSize: 24),
+              ),
+            ),
+          ),
         ),
         validator: (value) =>
             value?.isEmpty ?? true ? 'Title is required' : null,
@@ -757,120 +770,20 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
     );
   }
 
-  Widget _buildIconSelector() {
-    return _buildSection(
-      title: 'TITLE & ICON',
-      child: TextFormField(
-        decoration: InputDecoration(
-          hintText: 'Enter habit title',
-          isDense: true,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          suffixIcon: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: _showEmojiPicker,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                _iconPath,
-                style: const TextStyle(fontSize: 24),
+  Widget _buildSection({required String title, required Widget child}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: Colors.grey,
+                fontWeight: FontWeight.w600,
               ),
-            ),
-          ),
         ),
-        validator: (value) =>
-            value?.isEmpty ?? true ? 'Title is required' : null,
-        onSaved: (value) => _title = value ?? '',
-      ),
+        Gap.low,
+        child,
+      ],
     );
-  }
-
-  Widget _buildNotificationTime() {
-    return _buildSection(
-      title: 'REMINDER TIME',
-      child: InkWell(
-        onTap: _showTimePicker,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${_notificationTime.hour.toString().padLeft(2, '0')}:${_notificationTime.minute.toString().padLeft(2, '0')}',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const Icon(Icons.access_time, color: Colors.grey),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showTimePicker() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 280,
-          padding: const EdgeInsets.only(top: 6),
-          child: Column(
-            children: [
-              // Header
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Done'),
-                    ),
-                  ],
-                ),
-              ),
-              // Picker
-              Expanded(
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.time,
-                  initialDateTime: DateTime(
-                    2022,
-                    1,
-                    1,
-                    _notificationTime.hour,
-                    _notificationTime.minute,
-                  ),
-                  onDateTimeChanged: (DateTime newDateTime) {
-                    setState(() {
-                      _notificationTime = TimeOfDay(
-                        hour: newDateTime.hour,
-                        minute: newDateTime.minute,
-                      );
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${substring(1)}";
   }
 }

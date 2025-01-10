@@ -37,7 +37,7 @@ class HabitEntity {
     this.completions = const [],
     this.currentStreak = 0,
     this.bestStreak = 0,
-    required this.createdAt,
+    required this.createdAt, DateTime? lastCompletedAt,
   });
 
   HabitEntity copyWith({

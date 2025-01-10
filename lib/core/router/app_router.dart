@@ -1,5 +1,8 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
+import 'package:self_discipline_app/domain/entities/habit_entity.dart';
 import 'package:self_discipline_app/presentation/pages/habit_creation/habit_creation_page.dart';
+import 'package:self_discipline_app/presentation/pages/habit_editing/habit_editing_page.dart';
 import 'package:self_discipline_app/presentation/pages/home/home_page.dart';
 import 'package:self_discipline_app/presentation/pages/main/main_page.dart';
 import 'package:self_discipline_app/presentation/pages/settings/settings_page.dart';
@@ -22,6 +25,7 @@ class AppRouter extends _$AppRouter {
             CustomRoute(page: SettingsRoute.page),
           ],
         ),
-        CustomRoute(page: HabitCreationRoute.page)
+        CustomRoute(page: HabitCreationRoute.page),
+        CustomRoute(page: HabitEditingRoute.page),
       ];
 }
