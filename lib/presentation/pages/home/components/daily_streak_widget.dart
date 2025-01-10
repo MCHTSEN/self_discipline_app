@@ -102,7 +102,7 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final dayWidth = (screenWidth - 150) / 7;
+    final dayWidth = (screenWidth - 130) / 7;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final habitState = ref.watch(habitListProvider.notifier);
     final Color firstColor = Colors.black;
@@ -128,9 +128,8 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
                       date.month == currentDate.month;
                   final bool isCurrentMonth = date.month == currentDate.month;
 
-                  final cardColor = (isCurrentDay)
-                      ? Colors.white
-                      : Colors.transparent;
+                  final cardColor =
+                      (isCurrentDay) ? Colors.white : Colors.transparent;
 
                   final borderColor =
                       isCurrentDay ? Colors.grey : Colors.transparent;
