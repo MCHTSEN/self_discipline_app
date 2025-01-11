@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:self_discipline_app/core/helper/gap.dart';
 import 'package:self_discipline_app/core/theme/app_colors.dart';
 import 'package:self_discipline_app/domain/entities/habit_entity.dart';
+import 'package:self_discipline_app/presentation/viewmodels/habit_list_notifier.dart';
+import 'package:self_discipline_app/presentation/widgets/animated_text.dart';
 
-class HabitWidget extends StatelessWidget {
+class HabitWidget extends ConsumerWidget {
   final HabitEntity habit;
   final VoidCallback onComplete;
   final VoidCallback onUncomplete;
@@ -20,8 +24,15 @@ class HabitWidget extends StatelessWidget {
     required this.isCompleted,
   });
 
+  void _handleComplete(BuildContext context, WidgetRef ref) {
+    onComplete();
+
+    // Show completion celebration
+    ref.read(habitListProvider.notifier).showCompletionCelebration(context);
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final habitFrequencyString = habit.frequency == 'daily'
         ? 'Günlük'
         : habit.frequency == 'weekly'
@@ -46,12 +57,12 @@ class HabitWidget extends StatelessWidget {
         leading: _habitIcon(),
         title: _title(context),
         subtitle: _infos(context, habitFrequencyString),
-        trailing: _buildTrailingButton(),
+        trailing: _buildTrailingButton(context, ref),
       ),
     );
   }
 
-  Widget _buildTrailingButton() {
+  Widget _buildTrailingButton(BuildContext context, WidgetRef ref) {
     if (isCompleted) {
       return IconButton(
         icon: Icon(
@@ -66,16 +77,19 @@ class HabitWidget extends StatelessWidget {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            '${habit.currentQuantity}/${habit.targetValue}',
-            style: TextStyle(
+          AnimatedText(
+            text: '${habit.currentQuantity}/${habit.targetValue}',
+            textStyle: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
           ),
           IconButton(
             icon: Icon(Icons.add_circle_outline),
-            onPressed: () => onQuantityAdd(habit.currentQuantity + 1),
+            onPressed: () {
+              onQuantityAdd(habit.currentQuantity + 1);
+              HapticFeedback.lightImpact();
+            },
           ),
         ],
       );
@@ -83,7 +97,10 @@ class HabitWidget extends StatelessWidget {
 
     return IconButton(
       icon: Icon(Icons.check_circle_outline),
-      onPressed: onComplete,
+      onPressed: () {
+        _handleComplete(context, ref);
+        HapticFeedback.lightImpact();
+      },
     );
   }
 
@@ -92,9 +109,9 @@ class HabitWidget extends StatelessWidget {
         ? Row(
             children: [
               if (habit.currentStreak != 0)
-                Text(
-                  "Tamamlandı!",
-                  style: TextStyle(fontSize: 14.sp, color: Colors.purple),
+                AnimatedText(
+                  text: "Tamamlandı!",
+                  textStyle: TextStyle(fontSize: 14.sp, color: Colors.purple),
                 )
             ],
           )
@@ -140,7 +157,6 @@ class HabitWidget extends StatelessWidget {
     return Row(
       children: [
         Flexible(
-          // İlk text'i Flexible ile sardık
           child: Text(
             habit.title,
             style: Theme.of(context).textTheme.headlineSmall!.copyWith(

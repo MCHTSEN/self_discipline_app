@@ -1,6 +1,7 @@
+import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
-import 'dart:math' show max;
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:self_discipline_app/data/models/habit_model.dart';
 import 'package:self_discipline_app/domain/entities/habit_entity.dart';
 import 'package:self_discipline_app/domain/usecases/get_habits_usecase.dart';
@@ -8,6 +9,9 @@ import 'package:self_discipline_app/domain/usecases/create_habit_usecase.dart';
 import 'package:self_discipline_app/domain/usecases/update_habit_usecase.dart';
 import 'package:self_discipline_app/domain/usecases/delete_habit_usecase.dart';
 import 'package:self_discipline_app/presentation/viewmodels/streak_celebration_provider.dart';
+import 'package:self_discipline_app/presentation/widgets/completion_celebration.dart';
+import 'package:self_discipline_app/presentation/widgets/bottom_completion_animation.dart';
+import 'package:self_discipline_app/presentation/widgets/top_celebration_animation.dart';
 import 'providers.dart';
 
 final habitListProvider =
@@ -170,7 +174,7 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
   /// Marks a habit as completed for today
   /// Updates the streak if all habits for today are completed
   /// Shows a celebration animation for weekly streak milestones
-  Future<void> completeHabit(String habitId) async {
+  Future<void> completeHabit(String habitId, BuildContext context) async {
     final currentState = state;
     if (!currentState.hasValue) return;
 
@@ -210,10 +214,14 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
     );
 
     await _updateHabitInStateAndStorage(habitIndex, updatedHabit);
+
+    // Show celebrations after updating the habit
+    showCompletionCelebration(context);
   }
 
   /// Updates the quantity progress for a habit
-  Future<void> updateQuantity(String habitId, int newQuantity) async {
+  Future<void> updateQuantity(
+      String habitId, int newQuantity, BuildContext context) async {
     final currentState = state;
     if (!currentState.hasValue) return;
 
@@ -222,11 +230,12 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
     if (habitIndex == -1) return;
 
     final habit = habits[habitIndex];
+    final now = DateTime.now();
 
     if (habit.targetType != 'quantity' || habit.isCompletedToday) return;
 
     if (newQuantity >= habit.targetValue) {
-      await completeHabit(habitId);
+      await completeHabit(habitId, context);
       return;
     }
 
@@ -376,6 +385,41 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
   /// Shows a celebration animation for streak milestones
   void _showStreakCelebration(int streak) {
     streakCelebrationNotifier.showCelebration(streak);
+  }
+
+  /// Shows completion celebration when all habits are completed
+  void showCompletionCelebration(BuildContext context) {
+
+     // Check if all habits are completed
+    final now = DateTime.now();
+    final habits = state.value ?? [];
+    bool allHabitsCompletedToday = habits
+        .where((h) => _shouldShowHabitOnDate(h, now))
+        .every((h) => h.isCompletedToday);
+
+
+    // Show bottom animation for individual completion
+    if(!allHabitsCompletedToday)
+    showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (context) => const BottomCompletionAnimation(),
+    );
+
+   
+
+    if (allHabitsCompletedToday) {
+      // Show top celebration for all habits completion
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (context.mounted) {
+          showDialog(
+            context: context,
+            barrierColor: Colors.transparent,
+            builder: (context) => const TopCelebrationAnimation(),
+          );
+        }
+      });
+    }
   }
 
   /// Gets the total number of habits scheduled for today

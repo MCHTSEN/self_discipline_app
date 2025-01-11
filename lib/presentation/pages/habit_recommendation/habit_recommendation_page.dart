@@ -22,22 +22,13 @@ class HabitRecommendationPage extends ConsumerWidget {
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: true,
               titlePadding: const EdgeInsets.only(bottom: 16),
-              title: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.lightbulb_outline,
-                    size: 32,
-                    color: Colors.white,
-                  ),
+                  Icon(Icons.lightbulb_outline, size: 32),
                   const SizedBox(height: 8),
-                  Text(
-                    'Recommended Habits',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  Text('Recommended Habits',
+                      style: Theme.of(context).textTheme.titleLarge),
                 ],
               ),
               background: Container(

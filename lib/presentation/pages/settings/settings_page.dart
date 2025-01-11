@@ -32,22 +32,13 @@ class SettingsPage extends ConsumerWidget {
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: true,
               titlePadding: const EdgeInsets.only(bottom: 16),
-              title: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.settings_outlined,
-                    size: 32,
-                    color: Colors.white,
-                  ),
+                  Icon(Icons.settings_outlined, size: 32),
                   const SizedBox(height: 8),
-                  Text(
-                    AppStrings.settings,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  Text(AppStrings.settings,
+                      style: Theme.of(context).textTheme.titleLarge),
                 ],
               ),
               background: Container(

@@ -31,34 +31,29 @@ class HomePageState extends ConsumerState<HomePage> {
     final habitListState = ref.watch(habitListProvider);
     final formattedCurrentMonth = DateFormat.MMMM().format(DateTime.now());
 
-    return Stack(
-      children: [
-        Scaffold(
-          body: SafeArea(
-            child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeaderCard(context),
-                      Gap.normal,
-                      _dailyStreakAndYearlyProgress(
-                          formattedCurrentMonth, context),
-                      Gap.normal,
-                    ],
-                  ),
-                ),
-                SliverFillRemaining(
-                  hasScrollBody: true,
-                  child: _buildHabitsSection(habitListState),
-                ),
-              ],
+    return Scaffold(
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeaderCard(context),
+                  Gap.normal,
+                  _dailyStreakAndYearlyProgress(
+                      formattedCurrentMonth, context),
+                  Gap.normal,
+                ],
+              ),
             ),
-          ),
+            SliverFillRemaining(
+              hasScrollBody: true,
+              child: _buildHabitsSection(habitListState),
+            ),
+          ],
         ),
-        const StreakCelebration(),
-      ],
+      ),
     );
   }
 
@@ -187,7 +182,7 @@ class HomePageState extends ConsumerState<HomePage> {
         habits: habits,
         onCompleteHabit: (habitId) {
           Logger.info('Completing habit: $habitId');
-          ref.read(habitListProvider.notifier).completeHabit(habitId);
+          ref.read(habitListProvider.notifier).completeHabit(habitId, context);
         },
         onUncompleteHabit: (habitId) {
           Logger.info('Uncompleting habit: $habitId');
@@ -197,7 +192,7 @@ class HomePageState extends ConsumerState<HomePage> {
           Logger.info('Updating quantity for habit: $habitId to $quantity');
           ref
               .read(habitListProvider.notifier)
-              .updateQuantity(habitId, quantity);
+              .updateQuantity(habitId, quantity, context);
         },
       ),
       loading: () => const Center(child: CircularProgressIndicator()),
