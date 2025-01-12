@@ -677,6 +677,7 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
           _notificationTime.minute,
         ),
         difficulty: _difficulty,
+        createdAt: DateTime.now(),
       );
 
       ref.read(habitListProvider.notifier).addHabit(habit);

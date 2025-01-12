@@ -57,7 +57,17 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
   /// Adds a new habit to the list and persists it to storage
   Future<void> addHabit(HabitEntity newHabit) async {
     try {
+      final now = DateTime.now();
+      final creationDate = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      );
+
+      newHabit = newHabit.copyWith(createdAt: creationDate);
+
       await createHabit(newHabit);
+
       final currentList = state.value ?? [];
       final updatedList = [...currentList, newHabit];
       state = AsyncValue.data(updatedList);

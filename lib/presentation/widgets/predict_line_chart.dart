@@ -9,10 +9,10 @@ class LineChartSample5 extends StatefulWidget {
     Color? gradientColor1,
     Color? gradientColor2,
     Color? indicatorStrokeColor,
-  })  : gradientColor1 = gradientColor1 ?? Color.fromARGB(255, 79, 101, 117),
-        gradientColor2 = gradientColor2 ?? Color.fromARGB(255, 151, 214, 223),
+  })  : gradientColor1 = gradientColor1 ?? Color(0xffffbe0b),
+        gradientColor2 = gradientColor2 ?? Color(0xffffbe0b),
         indicatorStrokeColor =
-            indicatorStrokeColor ?? ChartColors.mainTextColor1;
+            indicatorStrokeColor ??Color(0xffffbe0b);
 
   final Color gradientColor1;
   final Color gradientColor2;
@@ -204,7 +204,6 @@ class _LineChartSample5State extends State<LineChartSample5> {
               rightTitles: const AxisTitles(
                 axisNameWidget: Text(''),
                 sideTitles: SideTitles(
-                  
                   showTitles: false,
                   reservedSize: 0,
                 ),

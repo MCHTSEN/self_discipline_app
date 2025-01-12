@@ -17,6 +17,7 @@ class HabitModelAdapter extends TypeAdapter<HabitModel> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return HabitModel(
+      createdAt: fields[12] as DateTime,
       id: fields[0] as String,
       title: fields[1] as String,
       iconPath: fields[2] as String,
@@ -35,7 +36,7 @@ class HabitModelAdapter extends TypeAdapter<HabitModel> {
   @override
   void write(BinaryWriter writer, HabitModel obj) {
     writer
-      ..writeByte(12)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -59,7 +60,9 @@ class HabitModelAdapter extends TypeAdapter<HabitModel> {
       ..writeByte(10)
       ..write(obj.currentStreak)
       ..writeByte(11)
-      ..write(obj.bestStreak);
+      ..write(obj.bestStreak)
+      ..writeByte(12)
+      ..write(obj.createdAt);
   }
 
   @override
