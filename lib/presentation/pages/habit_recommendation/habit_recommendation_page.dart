@@ -390,6 +390,7 @@ class HabitRecommendationPage extends ConsumerWidget {
       targetValue: habit.targetValue,
       frequency: habit.frequency,
       difficulty: habit.difficulty,
+      createdAt: DateTime.now(),
     );
 
     ref.read(habitListProvider.notifier).addHabit(newHabit);

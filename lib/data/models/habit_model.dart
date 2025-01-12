@@ -41,7 +41,11 @@ class HabitModel extends HiveObject {
   @HiveField(11)
   final int bestStreak;
 
+  @HiveField(12)
+  final DateTime createdAt;
+
   HabitModel({
+    required this.createdAt,
     required this.id,
     required this.title,
     required this.iconPath,
@@ -70,6 +74,7 @@ class HabitModel extends HiveObject {
       completions: entity.completions,
       currentStreak: entity.currentStreak,
       bestStreak: entity.bestStreak,
+      createdAt: entity.createdAt,
     );
   }
 
@@ -87,6 +92,7 @@ class HabitModel extends HiveObject {
       completions: completions,
       currentStreak: currentStreak,
       bestStreak: bestStreak,
+      createdAt: createdAt,
     );
   }
 }

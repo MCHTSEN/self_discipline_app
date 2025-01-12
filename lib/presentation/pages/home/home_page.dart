@@ -5,8 +5,8 @@ import 'package:self_discipline_app/core/constants/paddings.dart';
 import 'package:self_discipline_app/core/helper/gap.dart';
 import 'package:self_discipline_app/core/theme/app_colors.dart';
 import 'package:self_discipline_app/core/utils/logger.dart';
+import 'package:self_discipline_app/presentation/pages/home/components/daily_streak_widget.dart';
 import 'package:self_discipline_app/presentation/pages/home/components/header_section.dart';
-import 'package:self_discipline_app/presentation/pages/home/components/weekly_streak_widget.dart';
 import 'package:self_discipline_app/presentation/viewmodels/habit_list_notifier.dart';
 import 'package:self_discipline_app/presentation/widgets/predict_line_chart.dart';
 import 'package:self_discipline_app/presentation/widgets/streak_celebration.dart';
@@ -37,7 +37,6 @@ class HomePageState extends ConsumerState<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildHeaderCard(context),
-                      _buildStreakCard(context),
                       Gap.normal,
                       _buildProgressCard(context),
                       Gap.normal,
@@ -59,8 +58,7 @@ class HomePageState extends ConsumerState<HomePage> {
 
   Widget _buildHeaderCard(BuildContext context) {
     return Container(
-      margin: ProjectPaddingType.defaultPadding.allPadding,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      margin: ProjectPaddingType.defaultPadding.symmetricHorizontalPadding,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -91,7 +89,7 @@ class HomePageState extends ConsumerState<HomePage> {
       child: Stack(
         children: [
           Positioned(
-            right: -30,
+            right: -40,
             top: -30,
             child: Container(
               width: 120,
@@ -128,37 +126,12 @@ class HomePageState extends ConsumerState<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const HeaderSection(),
-              Gap.low,
-              Container(
+              Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.rocket_launch_rounded,
-                      color: Colors.white,
-                      size: 16,
-                    ),
-                    Gap.extraLow,
-                    Flexible(
-                      child: Text(
-                        'Keep pushing your limits!',
-                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                              height: 1.2,
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                child: const HeaderSection(),
               ),
+              _buildStreakCard(context),
             ],
           ),
         ],
@@ -168,18 +141,13 @@ class HomePageState extends ConsumerState<HomePage> {
 
   Widget _buildStreakCard(BuildContext context) {
     return Container(
-      margin: ProjectPaddingType.defaultPadding.symmetricHorizontalPadding,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: Colors.white.withOpacity(0.2),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1,
+        ),
       ),
       child: const DailyStreakWidget(),
     );
@@ -249,3 +217,35 @@ class HomePageState extends ConsumerState<HomePage> {
     );
   }
 }
+
+
+
+//  Container(
+//                 padding:
+//                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+//                 decoration: BoxDecoration(
+//                   color: Colors.white.withOpacity(0.15),
+//                   borderRadius: BorderRadius.circular(20),
+//                 ),
+//                 child: Row(
+//                   mainAxisSize: MainAxisSize.min,
+//                   children: [
+//                     const Icon(
+//                       Icons.rocket_launch_rounded,
+//                       color: Colors.white,
+//                       size: 16,
+//                     ),
+//                     Gap.extraLow,
+//                     Flexible(
+//                       child: Text(
+//                         'Keep pushing your limits!',
+//                         style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+//                               color: Colors.white,
+//                               fontWeight: FontWeight.w500,
+//                               height: 1.2,
+//                             ),
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ),
