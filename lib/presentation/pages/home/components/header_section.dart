@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:self_discipline_app/core/helper/gap.dart';
 import 'package:self_discipline_app/presentation/viewmodels/habit_list_notifier.dart';
 
@@ -8,7 +9,7 @@ class HeaderSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final habitsState = ref.watch(habitListProvider);
+    final habitListState = ref.watch(habitListProvider.notifier);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -27,21 +28,13 @@ class HeaderSection extends ConsumerWidget {
                             fontWeight: FontWeight.bold,
                           ),
                     ),
-                    habitsState.when(
-                      data: (habits) {
-                        final completedToday =
-                            habits.where((h) => h.isCompletedToday).length;
-                        final total = habits.length;
-                        return Text(
-                          '$completedToday of $total tasks completed',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.white.withOpacity(0.9),
-                                  ),
-                        );
-                      },
-                      loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
+                    Gap.extraLow,
+                    Text(
+                      'Welcome back to Self Discipline',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ],
                 ),
@@ -67,7 +60,7 @@ class HeaderSection extends ConsumerWidget {
                     ),
                     Gap.extraLow,
                     Text(
-                      '7 Days',
+                      habitListState.currentStreak.toString(),
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,

@@ -21,6 +21,16 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const HabitCreationPage(),
       );
     },
+    HabitEditingRoute.name: (routeData) {
+      final args = routeData.argsAs<HabitEditingRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: HabitEditingPage(
+          key: args.key,
+          habit: args.habit,
+        ),
+      );
+    },
     HabitRecommendationRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -66,6 +76,44 @@ class HabitCreationRoute extends PageRouteInfo<void> {
   static const String name = 'HabitCreationRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [HabitEditingPage]
+class HabitEditingRoute extends PageRouteInfo<HabitEditingRouteArgs> {
+  HabitEditingRoute({
+    Key? key,
+    required HabitEntity habit,
+    List<PageRouteInfo>? children,
+  }) : super(
+          HabitEditingRoute.name,
+          args: HabitEditingRouteArgs(
+            key: key,
+            habit: habit,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'HabitEditingRoute';
+
+  static const PageInfo<HabitEditingRouteArgs> page =
+      PageInfo<HabitEditingRouteArgs>(name);
+}
+
+class HabitEditingRouteArgs {
+  const HabitEditingRouteArgs({
+    this.key,
+    required this.habit,
+  });
+
+  final Key? key;
+
+  final HabitEntity habit;
+
+  @override
+  String toString() {
+    return 'HabitEditingRouteArgs{key: $key, habit: $habit}';
+  }
 }
 
 /// generated route for

@@ -11,6 +11,7 @@ class HabitEntity {
   final List<DateTime> completions; // Tüm tamamlanma tarihlerini tutar
   final int currentStreak;
   final int bestStreak;
+  final DateTime createdAt;
 
   bool get isCompletedToday {
     final now = DateTime.now();
@@ -36,6 +37,7 @@ class HabitEntity {
     this.completions = const [],
     this.currentStreak = 0,
     this.bestStreak = 0,
+    required this.createdAt, DateTime? lastCompletedAt,
   });
 
   HabitEntity copyWith({
@@ -50,6 +52,7 @@ class HabitEntity {
     List<DateTime>? completions,
     int? currentStreak,
     int? bestStreak,
+    DateTime? createdAt,
   }) {
     return HabitEntity(
       id: id,
@@ -64,6 +67,7 @@ class HabitEntity {
       completions: completions ?? this.completions,
       currentStreak: currentStreak ?? this.currentStreak,
       bestStreak: bestStreak ?? this.bestStreak,
+      createdAt: createdAt?? this.createdAt,
     );
   }
 }

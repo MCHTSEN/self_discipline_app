@@ -1,7 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:self_discipline_app/core/theme/app_colors.dart';
-import 'package:self_discipline_app/presentation/widgets/line_chart.dart';
 
 class LineChartSample5 extends StatefulWidget {
   LineChartSample5({
@@ -9,10 +7,10 @@ class LineChartSample5 extends StatefulWidget {
     Color? gradientColor1,
     Color? gradientColor2,
     Color? indicatorStrokeColor,
-  })  : gradientColor1 = gradientColor1 ?? Color.fromARGB(255, 79, 101, 117),
-        gradientColor2 = gradientColor2 ?? Color.fromARGB(255, 151, 214, 223),
+  })  : gradientColor1 = gradientColor1 ?? Color.fromARGB(255, 255, 11, 218),
+        gradientColor2 = gradientColor2 ?? Color.fromARGB(126, 255, 11, 222),
         indicatorStrokeColor =
-            indicatorStrokeColor ?? ChartColors.mainTextColor1;
+            indicatorStrokeColor ??Color.fromARGB(165, 243, 11, 255);
 
   final Color gradientColor1;
   final Color gradientColor2;
@@ -138,7 +136,7 @@ class _LineChartSample5State extends State<LineChartSample5> {
     ];
 
     return AspectRatio(
-      aspectRatio: 2.8,
+      aspectRatio: 2,
       child: LayoutBuilder(builder: (context, constraints) {
         return LineChart(
           LineChartData(
@@ -204,7 +202,6 @@ class _LineChartSample5State extends State<LineChartSample5> {
               rightTitles: const AxisTitles(
                 axisNameWidget: Text(''),
                 sideTitles: SideTitles(
-                  
                   showTitles: false,
                   reservedSize: 0,
                 ),

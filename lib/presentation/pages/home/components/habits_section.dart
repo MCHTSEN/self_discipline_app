@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:self_discipline_app/core/constants/paddings.dart';
 import 'package:self_discipline_app/core/helper/gap.dart';
 import 'package:self_discipline_app/core/theme/app_colors.dart';
 import 'package:self_discipline_app/domain/entities/habit_entity.dart';
@@ -90,7 +89,7 @@ class HabitsSection extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.only(left: 20, right: 20, top: 20),
             child: Row(
               children: [
                 Text(
@@ -122,14 +121,15 @@ class HabitsSection extends ConsumerWidget {
             child: CustomScrollView(
               primary: false,
               slivers: [
+                 if (completedHabits.isNotEmpty) ...[
+                  _buildSectionHeader(context, 'Completed Today'),
+                  _buildHabitsList(completedHabits, true),
+                ],
                 if (uncompletedHabits.isNotEmpty) ...[
                   _buildSectionHeader(context, 'To Complete'),
                   _buildHabitsList(uncompletedHabits, false),
                 ],
-                if (completedHabits.isNotEmpty) ...[
-                  _buildSectionHeader(context, 'Completed Today'),
-                  _buildHabitsList(completedHabits, true),
-                ],
+               
               ],
             ),
           ),

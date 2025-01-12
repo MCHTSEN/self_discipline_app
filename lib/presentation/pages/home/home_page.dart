@@ -1,17 +1,21 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:self_discipline_app/core/constants/paddings.dart';
 import 'package:self_discipline_app/core/helper/gap.dart';
 import 'package:self_discipline_app/core/theme/app_colors.dart';
 import 'package:self_discipline_app/core/utils/logger.dart';
+import 'package:self_discipline_app/domain/entities/habit_entity.dart';
+import 'package:self_discipline_app/presentation/pages/home/components/daily_streak_widget.dart';
+import 'package:self_discipline_app/presentation/pages/home/components/habits_section.dart';
 import 'package:self_discipline_app/presentation/pages/home/components/header_section.dart';
-import 'package:self_discipline_app/presentation/pages/home/components/weekly_streak_widget.dart';
+import 'package:self_discipline_app/presentation/pages/home/components/performance_widget.dart';
 import 'package:self_discipline_app/presentation/viewmodels/habit_list_notifier.dart';
+import 'package:self_discipline_app/presentation/widgets/dotted_divider.dart';
 import 'package:self_discipline_app/presentation/widgets/predict_line_chart.dart';
 import 'package:self_discipline_app/presentation/widgets/streak_celebration.dart';
-import 'package:self_discipline_app/presentation/pages/home/components/habits_section.dart';
-import 'package:self_discipline_app/domain/entities/habit_entity.dart';
 
 @RoutePage()
 class HomePage extends ConsumerStatefulWidget {
@@ -25,6 +29,7 @@ class HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final habitListState = ref.watch(habitListProvider);
+    final formattedCurrentMonth = DateFormat.MMMM().format(DateTime.now());
 
     return Stack(
       children: [
@@ -37,9 +42,9 @@ class HomePageState extends ConsumerState<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildHeaderCard(context),
-                      _buildStreakCard(context),
                       Gap.normal,
-                      _buildProgressCard(context),
+                      _dailyStreakAndYearlyProgress(
+                          formattedCurrentMonth, context),
                       Gap.normal,
                     ],
                   ),
@@ -57,22 +62,64 @@ class HomePageState extends ConsumerState<HomePage> {
     );
   }
 
+  Container _dailyStreakAndYearlyProgress(
+      String formattedCurrentMonth, BuildContext context) {
+    return Container(
+      margin: ProjectPaddingType.defaultPadding.symmetricHorizontalPadding,
+      padding: ProjectPaddingType.defaultPadding.allPadding,
+      decoration: BoxDecoration(
+        borderRadius: ProjectRadiusType.extraLargeRadius.allRadius,
+        color: Colors.white,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(formattedCurrentMonth),
+          _buildStreakCard(context),
+          Row(
+            children: [
+              _buildProgressCard(context),
+              Gap.normal,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    PerformanceWidget(
+                        text: 'Keep pushing your limits!',
+                        icon: Icons.rocket_launch_rounded),
+                    Gap.extraLow,
+                    DottedDivider(),
+                    Gap.extraLow,
+                    PerformanceWidget(
+                        text: 'Stay consistent to build a streak!',
+                        icon: Icons.star),
+                    Gap.extraLow,
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHeaderCard(BuildContext context) {
     return Container(
-      margin: ProjectPaddingType.defaultPadding.allPadding,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      margin: ProjectPaddingType.defaultPadding.symmetricHorizontalPadding,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppSecondaryColors.liquidLava,
-            AppSecondaryColors.liquidLava.withOpacity(0.9),
-            AppSecondaryColors.liquidLava.withOpacity(0.8),
+            Color.fromARGB(105, 245, 15, 237),
+            AppSecondaryColors.liquidLava.withOpacity(0.4),
+            Color.fromARGB(94, 245, 15, 203).withOpacity(0.8),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          stops: const [0.2, 0.6, 0.9],
+          stops: const [0.1, 0.6, 0.99],
         ),
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: ProjectRadiusType.extraLargeRadius.allRadius,
         boxShadow: [
           BoxShadow(
             color: AppSecondaryColors.liquidLava.withOpacity(0.4),
@@ -88,78 +135,13 @@ class HomePageState extends ConsumerState<HomePage> {
           ),
         ],
       ),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Positioned(
-            right: -30,
-            top: -30,
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    Colors.white.withOpacity(0.15),
-                    Colors.white.withOpacity(0.05),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: -20,
-            bottom: -20,
-            child: Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    Colors.white.withOpacity(0.12),
-                    Colors.white.withOpacity(0.04),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const HeaderSection(),
-              Gap.low,
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.rocket_launch_rounded,
-                      color: Colors.white,
-                      size: 16,
-                    ),
-                    Gap.extraLow,
-                    Flexible(
-                      child: Text(
-                        'Keep pushing your limits!',
-                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                              height: 1.2,
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            child: const HeaderSection(),
           ),
         ],
       ),
@@ -168,18 +150,10 @@ class HomePageState extends ConsumerState<HomePage> {
 
   Widget _buildStreakCard(BuildContext context) {
     return Container(
-      margin: ProjectPaddingType.defaultPadding.symmetricHorizontalPadding,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: Colors.white,
+        borderRadius: ProjectRadiusType.extraLargeRadius.bottomLeftRightRadius,
+        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
       ),
       child: const DailyStreakWidget(),
     );
@@ -187,30 +161,10 @@ class HomePageState extends ConsumerState<HomePage> {
 
   Widget _buildProgressCard(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(
-        left: ProjectPaddingType.defaultPadding.value,
-        right: ProjectPaddingType.defaultPadding.value,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Stack(
+      width: 150,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: ProjectPaddingType.smallPadding.allPadding,
-            child: Text(
-              '📈 Progress Overview',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ),
           Stack(
             children: [
               Positioned(

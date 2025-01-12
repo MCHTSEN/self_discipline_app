@@ -44,6 +44,60 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
     _init();
   }
 
+  int get currentStreak {
+    int streak = 0;
+    DateTime checkDate = DateTime.now().subtract(const Duration(days: 1));
+
+    // _isDateCompleted(checkDate) true döndükçe geriye gidip sayacı artır
+    while (isDateCompleted(checkDate)) {
+      streak++;
+      checkDate = checkDate.subtract(const Duration(days: 1));
+    }
+
+    // Bugün tamamlanmışsa streak'i artır
+    if (isDateCompleted(DateTime.now())) {
+      streak++;
+    }
+
+    return streak;
+  }
+
+  /// Kontrol: Belirli bir tarihte (date) var olan tüm habit'ler tamamlanmış mı?
+  bool isDateCompleted(DateTime date) {
+    final habitsState = state;
+    return habitsState.when(
+      data: (habits) {
+        if (habits.isEmpty) return false;
+
+        // Sadece date tarihinden önce ya da aynı gün oluşturulmuş habit'leri kontrol ediyoruz
+        final habitsExistingOnDate = habits.where((habit) {
+          // createdAt, habit'in ne zaman oluşturulduğunu tutar
+          return habit.createdAt.isBefore(date) ||
+              _isSameDay(habit.createdAt, date);
+        }).toList();
+
+        // O güne kadar henüz hiç habit oluşturulmamışsa false dönelim
+        if (habitsExistingOnDate.isEmpty) return false;
+
+        // Bu tarihe kadar var olan habit'lerin hepsinde, date günü bir completion var mı?
+        return habitsExistingOnDate.every(
+          (habit) => habit.completions.any(
+            (completion) =>
+                completion.year == date.year &&
+                completion.month == date.month &&
+                completion.day == date.day,
+          ),
+        );
+      },
+      loading: () => false,
+      error: (_, __) => false,
+    );
+  }
+
+  bool _isSameDay(DateTime d1, DateTime d2) {
+    return d1.year == d2.year && d1.month == d2.month && d1.day == d2.day;
+  }
+
   /// Initializes the habit list by loading habits from storage
   Future<void> _init() async {
     try {
@@ -57,7 +111,17 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
   /// Adds a new habit to the list and persists it to storage
   Future<void> addHabit(HabitEntity newHabit) async {
     try {
+      final now = DateTime.now();
+      final creationDate = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      );
+
+      newHabit = newHabit.copyWith(createdAt: creationDate);
+
       await createHabit(newHabit);
+
       final currentList = state.value ?? [];
       final updatedList = [...currentList, newHabit];
       state = AsyncValue.data(updatedList);

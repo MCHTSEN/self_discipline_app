@@ -36,10 +36,7 @@ class AppInitializer {
     }
 
     // Set preferred orientations
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
     // Set system UI overlay style
     SystemChrome.setSystemUIOverlayStyle(
@@ -59,7 +56,7 @@ class AppInitializer {
     return ProviderScope(
       overrides: overrides,
       child: DevicePreview(
-        enabled: true,
+        enabled: false,
         builder: (context) => app,
       ),
     );

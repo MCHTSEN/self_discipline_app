@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:self_discipline_app/core/router/app_router.dart';
 import 'package:self_discipline_app/core/services/app_initializer.dart';
 import 'package:self_discipline_app/core/theme/app_theme.dart';
@@ -18,13 +19,17 @@ class MyApp extends ConsumerWidget {
     final themeMode = ref.watch(appThemeProvider);
     final router = AppRouter();
 
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      title: 'Self Discipline',
-      theme: AppTheme.lightTheme(),
-      darkTheme: AppTheme.darkTheme(),
-      themeMode: themeMode,
-      routerConfig: router.config(),
+    return ResponsiveSizer(
+      builder: (context, orientation, screenType) {
+        return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          title: 'Self Discipline',
+          theme: AppTheme.lightTheme(),
+          darkTheme: AppTheme.darkTheme(),
+          themeMode: themeMode,
+          routerConfig: router.config(),
+        );
+      },
     );
   }
 }
