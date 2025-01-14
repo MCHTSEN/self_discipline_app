@@ -49,6 +49,19 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const MainPage(),
       );
     },
+    OnboardingRoute.name: (routeData) {
+      final args = routeData.argsAs<OnboardingRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: OnboardingPage(
+          key: args.key,
+          pages: args.pages,
+          showBackButtons: args.showBackButtons,
+          showNextButtons: args.showNextButtons,
+          onComplete: args.onComplete,
+        ),
+      );
+    },
     SettingsRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -156,6 +169,59 @@ class MainRoute extends PageRouteInfo<void> {
   static const String name = 'MainRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [OnboardingPage]
+class OnboardingRoute extends PageRouteInfo<OnboardingRouteArgs> {
+  OnboardingRoute({
+    Key? key,
+    required List<Widget> pages,
+    List<bool>? showBackButtons,
+    List<bool>? showNextButtons,
+    VoidCallback? onComplete,
+    List<PageRouteInfo>? children,
+  }) : super(
+          OnboardingRoute.name,
+          args: OnboardingRouteArgs(
+            key: key,
+            pages: pages,
+            showBackButtons: showBackButtons,
+            showNextButtons: showNextButtons,
+            onComplete: onComplete,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'OnboardingRoute';
+
+  static const PageInfo<OnboardingRouteArgs> page =
+      PageInfo<OnboardingRouteArgs>(name);
+}
+
+class OnboardingRouteArgs {
+  const OnboardingRouteArgs({
+    this.key,
+    required this.pages,
+    this.showBackButtons,
+    this.showNextButtons,
+    this.onComplete,
+  });
+
+  final Key? key;
+
+  final List<Widget> pages;
+
+  final List<bool>? showBackButtons;
+
+  final List<bool>? showNextButtons;
+
+  final VoidCallback? onComplete;
+
+  @override
+  String toString() {
+    return 'OnboardingRouteArgs{key: $key, pages: $pages, showBackButtons: $showBackButtons, showNextButtons: $showNextButtons, onComplete: $onComplete}';
+  }
 }
 
 /// generated route for

@@ -8,7 +8,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      primaryColor: AppSecondaryColors.liquidLava,
+      primaryColor: Color.fromARGB(196, 15, 138, 245),
       scaffoldBackgroundColor:  Colors.grey.shade200,
       textTheme: AppTextStyles.lightTheme,
 

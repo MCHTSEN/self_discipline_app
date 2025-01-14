@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:self_discipline_app/core/constants/paddings.dart';
 import 'package:self_discipline_app/core/helper/gap.dart';
+import 'package:self_discipline_app/core/router/app_router.dart';
 import 'package:self_discipline_app/core/theme/app_colors.dart';
 import 'package:self_discipline_app/core/utils/logger.dart';
 import 'package:self_discipline_app/domain/entities/habit_entity.dart';
@@ -12,6 +13,7 @@ import 'package:self_discipline_app/presentation/pages/home/components/daily_str
 import 'package:self_discipline_app/presentation/pages/home/components/habits_section.dart';
 import 'package:self_discipline_app/presentation/pages/home/components/header_section.dart';
 import 'package:self_discipline_app/presentation/pages/home/components/performance_widget.dart';
+import 'package:self_discipline_app/presentation/pages/onboarding/screens/first_screen.dart';
 import 'package:self_discipline_app/presentation/viewmodels/habit_list_notifier.dart';
 import 'package:self_discipline_app/presentation/widgets/dotted_divider.dart';
 import 'package:self_discipline_app/presentation/widgets/predict_line_chart.dart';
@@ -25,6 +27,25 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class HomePageState extends ConsumerState<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    context.router.push(
+      OnboardingRoute(
+        pages: [
+          FirstScreen(),
+          Container(color: Colors.green, child: Text("3")),
+          Container(color: Colors.green, child: Text("3")),
+        ],
+        showBackButtons: [false, true],
+        showNextButtons: [true, true],
+        onComplete: () {
+          context.router.pop();
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final habitListState = ref.watch(habitListProvider);
