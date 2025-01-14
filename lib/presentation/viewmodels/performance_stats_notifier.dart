@@ -175,9 +175,9 @@ class PerformanceStatsNotifier extends StateNotifier<PerformanceStats> {
     // Calculate compound growth rate based on current performance
     double dailyGrowthRate = 0.01; // 1% base growth
     if (currentConsistency < 0.5) {
-      dailyGrowthRate = 0.015; // 1.5% for low performers
+      dailyGrowthRate = 0.01; // Max 1% growth for all performers
     } else if (currentConsistency < 0.8) {
-      dailyGrowthRate = 0.012; // 1.2% for medium performers
+      dailyGrowthRate = 0.01; // Max 1% growth for all performers
     }
 
     // Calculate potential growth using compound interest formula: (1 + r)^t

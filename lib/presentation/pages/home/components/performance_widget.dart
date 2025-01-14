@@ -4,6 +4,7 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:self_discipline_app/core/constants/paddings.dart';
 import 'package:self_discipline_app/core/helper/gap.dart';
 import 'package:self_discipline_app/presentation/viewmodels/performance_stats_notifier.dart';
+import 'dart:math' as math;
 
 /// Displays performance-related information with an icon and text
 class PerformanceWidget extends ConsumerWidget {
@@ -32,14 +33,14 @@ class PerformanceWidget extends ConsumerWidget {
                 color: const Color.fromARGB(86, 255, 83, 226),
                 borderRadius: BorderRadius.circular(20),
               ),
-              padding: ProjectPaddingType.xSmallPadding.allPadding,
-              child: Icon(icon, color: Colors.black, size: 13),
+              padding: const EdgeInsets.all(4),
+              child: Icon(icon, color: Colors.black, size: 12.sp),
             ),
             Gap.extraLow,
             Expanded(
               child: Text(
                 text,
-                style: TextStyle(color: Colors.black, fontSize: 13.sp),
+                style: TextStyle(color: Colors.black, fontSize: 12.sp),
               ),
             ),
           ],
@@ -51,9 +52,31 @@ class PerformanceWidget extends ConsumerWidget {
   /// Gets the display text and icon based on the metric type and current stats
   (String, IconData) _getMetricInfo(
       PerformanceStats stats, PerformanceMetricType type) {
+    final now = DateTime.now();
+    final lastMonth = DateTime(now.year, now.month - 1);
+    final monthName = switch (lastMonth.month) {
+      1 => "Ocak",
+      2 => "Şubat",
+      3 => "Mart",
+      4 => "Nisan",
+      5 => "Mayıs",
+      6 => "Haziran",
+      7 => "Temmuz",
+      8 => "Ağustos",
+      9 => "Eylül",
+      10 => "Ekim",
+      11 => "Kasım",
+      12 => "Aralık",
+      _ => "",
+    };
+
+    // Calculate year-end total growth
+    final daysLeft = DateTime(now.year, 12, 31).difference(now).inDays + 1;
+    final yearEndMultiplier = math.pow(1 + stats.compoundGrowthRate, daysLeft);
+
     return switch (type) {
       PerformanceMetricType.improvement => (
-          'Günlük %${(stats.compoundGrowthRate * 100).toStringAsFixed(1)} gelişimle ${stats.daysLeft} günde ${stats.potentialGrowth.toStringAsFixed(1)}x büyüme!',
+          '$monthName ayı başarı oranı: %${(stats.currentConsistency * 100).toStringAsFixed(0)}. Günlük %${(stats.compoundGrowthRate * 100).toStringAsFixed(1)} gelişimle yıl sonunda ${yearEndMultiplier.toStringAsFixed(1)}x büyüme!',
           Icons.rocket_launch_rounded,
         ),
       PerformanceMetricType.streak => (

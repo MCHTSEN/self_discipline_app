@@ -1,8 +1,8 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:self_discipline_app/core/constants/paddings.dart';
 import 'package:self_discipline_app/core/helper/gap.dart';
 import 'package:self_discipline_app/core/theme/app_colors.dart';
@@ -15,7 +15,6 @@ import 'package:self_discipline_app/presentation/pages/home/components/performan
 import 'package:self_discipline_app/presentation/viewmodels/habit_list_notifier.dart';
 import 'package:self_discipline_app/presentation/widgets/dotted_divider.dart';
 import 'package:self_discipline_app/presentation/widgets/predict_line_chart.dart';
-import 'package:self_discipline_app/presentation/widgets/streak_celebration.dart';
 
 @RoutePage()
 class HomePage extends ConsumerStatefulWidget {
@@ -41,8 +40,7 @@ class HomePageState extends ConsumerState<HomePage> {
                 children: [
                   _buildHeaderCard(context),
                   Gap.normal,
-                  _dailyStreakAndYearlyProgress(
-                      formattedCurrentMonth, context),
+                  _dailyStreakAndYearlyProgress(formattedCurrentMonth, context),
                   Gap.normal,
                 ],
               ),
@@ -71,10 +69,27 @@ class HomePageState extends ConsumerState<HomePage> {
         children: [
           Text(formattedCurrentMonth),
           _buildStreakCard(context),
+          Gap.low,
+          Row(
+            children: [
+              Expanded(
+                  child:
+                      Divider(color: Colors.black, thickness: 1, endIndent: 5)),
+              Text("Küçük adımlar, büyük değişimlere yol açar.",
+                  style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black54,
+                      fontStyle: FontStyle.italic)),
+              Expanded(
+                  child: Divider(color: Colors.black, thickness: 1, indent: 5)),
+            ],
+          ),
+          Gap.low,
           Row(
             children: [
               _buildProgressCard(context),
-              Gap.normal,
+              Gap.low,
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,27 +167,9 @@ class HomePageState extends ConsumerState<HomePage> {
 
   Widget _buildProgressCard(BuildContext context) {
     return Container(
-      width: 150,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              Positioned(
-                bottom: 0,
-                left: 5,
-                child: Text('Jan'),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 5,
-                child: Text('Dec'),
-              ),
-              LineChartSample5(),
-            ],
-          ),
-        ],
-      ),
+      width: 200,
+      height: 130,
+      child: LineChartSample5(),
     );
   }
 

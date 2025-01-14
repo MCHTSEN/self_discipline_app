@@ -10,39 +10,13 @@ class BottomCompletionAnimation extends StatefulWidget {
       _BottomCompletionAnimationState();
 }
 
-class _BottomCompletionAnimationState extends State<BottomCompletionAnimation>
-    with SingleTickerProviderStateMixin {
+class _BottomCompletionAnimationState extends State<BottomCompletionAnimation> {
   late AnimationController _controller;
-  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
     HapticFeedback.lightImpact();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    );
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 1),
-      end: const Offset(0, 0),
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.elasticOut,
-    ));
-
-    _controller.forward().then((_) {
-      Future.delayed(const Duration(seconds: 1), () {
-        if (mounted) {
-          _controller.reverse().then((_) {
-            if (mounted) {
-              Navigator.of(context).pop();
-            }
-          });
-        }
-      });
-    });
   }
 
   @override

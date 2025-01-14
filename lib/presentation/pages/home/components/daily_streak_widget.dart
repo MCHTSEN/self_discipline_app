@@ -97,7 +97,7 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
 
         return Container(
           width: double.infinity,
-          height: 80,
+          height: 52,
           child: PageView.builder(
             controller: _pageController,
             itemCount: totalWeeks,
