@@ -11,9 +11,9 @@ class LineChartSample5 extends ConsumerStatefulWidget {
     Color? predictedDataColor,
     Color? indicatorStrokeColor,
   })  : pastDataColor =
-            pastDataColor ?? Color.fromARGB(255, 102, 7, 119), // Mavi
+            pastDataColor ?? Color.fromARGB(255, 212, 73, 172), // Mavi
         predictedDataColor =
-            predictedDataColor ?? Color.fromARGB(255, 146, 246, 243), // Yeşil
+            predictedDataColor ?? Color.fromARGB(255, 249, 224, 80), // Yeşil
         indicatorStrokeColor = indicatorStrokeColor ?? Colors.pink;
 
   final Color pastDataColor;

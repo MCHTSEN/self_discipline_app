@@ -80,8 +80,8 @@ class PerformanceWidget extends ConsumerWidget {
           Icons.rocket_launch_rounded,
         ),
       PerformanceMetricType.streak => (
-          'Şu anki tutarlılık: %${(stats.currentConsistency * 100).toStringAsFixed(0)}, Hedef: ${stats.projectedStreak} gün',
-          Icons.star,
+          'Son 7 günlük başarı: %${(stats.weeklyConsistency * 100).toStringAsFixed(0)}, En iyi seri: ${stats.bestStreak} gün 🏆',
+          Icons.trending_up_rounded,
         ),
     };
   }

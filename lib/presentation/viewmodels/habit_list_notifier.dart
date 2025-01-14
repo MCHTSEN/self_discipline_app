@@ -400,11 +400,15 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
 
     // Show bottom animation for individual completion
     if(!allHabitsCompletedToday)
-    showDialog(
-      context: context,
-      barrierColor: Colors.transparent,
-      builder: (context) => const BottomCompletionAnimation(),
-    );
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierColor: Colors.transparent,
+          builder: (context) => const BottomCompletionAnimation(),
+        );
+      }
+    });
 
    
 

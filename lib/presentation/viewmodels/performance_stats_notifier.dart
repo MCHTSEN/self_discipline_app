@@ -46,6 +46,8 @@ class PerformanceStats with _$PerformanceStats {
     required double compoundGrowthRate,
     required int daysLeft,
     required double potentialGrowth,
+    required double weeklyConsistency,
+    required int bestStreak,
   }) = _PerformanceStats;
 
   factory PerformanceStats.initial() => const PerformanceStats(
@@ -57,6 +59,8 @@ class PerformanceStats with _$PerformanceStats {
         compoundGrowthRate: 0.01, // 1% daily growth
         daysLeft: 0,
         potentialGrowth: 1.0,
+        weeklyConsistency: 0.0,
+        bestStreak: 0,
       );
 }
 
@@ -86,6 +90,16 @@ class PerformanceStatsNotifier extends StateNotifier<PerformanceStats> {
     int totalPossibleCompletions = 0;
     int actualCompletions = 0;
 
+    // Calculate weekly consistency (last 7 days)
+    final weekStart = now.subtract(const Duration(days: 6));
+    int weeklyPossible = 0;
+    int weeklyCompleted = 0;
+
+    // Calculate best streak
+    int bestStreak = 0;
+    int currentStreak = 0;
+    DateTime? lastCompletionDate;
+
     // Calculate from start of year to today
     for (var date = startOfYear;
         date.isBefore(now) || _isSameDay(date, now);
@@ -96,17 +110,44 @@ class PerformanceStatsNotifier extends StateNotifier<PerformanceStats> {
               _shouldShowHabitOnDate(h, date))
           .toList();
 
-      totalPossibleCompletions += habitsForDate.length;
-      actualCompletions += habitsForDate
+      final completedHabits = habitsForDate
           .where((h) =>
               h.completions.any((completion) => _isSameDay(completion, date)))
           .length;
+
+      totalPossibleCompletions += habitsForDate.length;
+      actualCompletions += completedHabits;
+
+      // Weekly calculations
+      if (!date.isBefore(weekStart)) {
+        weeklyPossible += habitsForDate.length;
+        weeklyCompleted += completedHabits;
+      }
+
+      // Streak calculations
+      if (completedHabits > 0 && habitsForDate.isNotEmpty) {
+        if (lastCompletionDate == null ||
+            date.difference(lastCompletionDate).inDays == 1) {
+          currentStreak++;
+        } else {
+          currentStreak = 1;
+        }
+        lastCompletionDate = date;
+        bestStreak = currentStreak > bestStreak ? currentStreak : bestStreak;
+      } else if (habitsForDate.isNotEmpty) {
+        currentStreak = 0;
+        lastCompletionDate = null;
+      }
     }
 
     // Calculate current consistency with a minimum value
     double currentConsistency = totalPossibleCompletions > 0
         ? actualCompletions / totalPossibleCompletions
         : 0.0;
+
+    // Calculate weekly consistency
+    double weeklyConsistency =
+        weeklyPossible > 0 ? weeklyCompleted / weeklyPossible : 0.0;
 
     // If all habits are completed today, boost consistency
     final todayHabits =
@@ -118,10 +159,13 @@ class PerformanceStatsNotifier extends StateNotifier<PerformanceStats> {
 
     if (todayHabits.isNotEmpty && completedTodayHabits == todayHabits.length) {
       currentConsistency = (currentConsistency + 1) / 2; // Boost consistency
+      weeklyConsistency =
+          (weeklyConsistency + 1) / 2; // Boost weekly consistency
     }
 
     // Ensure minimum consistency of 30%
     currentConsistency = currentConsistency.clamp(0.3, 1.0);
+    weeklyConsistency = weeklyConsistency.clamp(0.3, 1.0);
 
     // Calculate days left and projected outcomes
     final daysLeft = DateTime(now.year, 12, 31).difference(now).inDays + 1;
@@ -192,6 +236,8 @@ class PerformanceStatsNotifier extends StateNotifier<PerformanceStats> {
       compoundGrowthRate: dailyGrowthRate,
       daysLeft: daysLeft,
       potentialGrowth: potentialGrowth,
+      weeklyConsistency: weeklyConsistency,
+      bestStreak: bestStreak,
     );
   }
 

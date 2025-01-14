@@ -24,6 +24,8 @@ mixin _$PerformanceStats {
   double get compoundGrowthRate => throw _privateConstructorUsedError;
   int get daysLeft => throw _privateConstructorUsedError;
   double get potentialGrowth => throw _privateConstructorUsedError;
+  double get weeklyConsistency => throw _privateConstructorUsedError;
+  int get bestStreak => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $PerformanceStatsCopyWith<PerformanceStats> get copyWith =>
@@ -44,7 +46,9 @@ abstract class $PerformanceStatsCopyWith<$Res> {
       double currentConsistency,
       double compoundGrowthRate,
       int daysLeft,
-      double potentialGrowth});
+      double potentialGrowth,
+      double weeklyConsistency,
+      int bestStreak});
 }
 
 /// @nodoc
@@ -68,6 +72,8 @@ class _$PerformanceStatsCopyWithImpl<$Res, $Val extends PerformanceStats>
     Object? compoundGrowthRate = null,
     Object? daysLeft = null,
     Object? potentialGrowth = null,
+    Object? weeklyConsistency = null,
+    Object? bestStreak = null,
   }) {
     return _then(_value.copyWith(
       projectedTotalCompletions: null == projectedTotalCompletions
@@ -102,6 +108,14 @@ class _$PerformanceStatsCopyWithImpl<$Res, $Val extends PerformanceStats>
           ? _value.potentialGrowth
           : potentialGrowth // ignore: cast_nullable_to_non_nullable
               as double,
+      weeklyConsistency: null == weeklyConsistency
+          ? _value.weeklyConsistency
+          : weeklyConsistency // ignore: cast_nullable_to_non_nullable
+              as double,
+      bestStreak: null == bestStreak
+          ? _value.bestStreak
+          : bestStreak // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 }
@@ -122,7 +136,9 @@ abstract class _$$PerformanceStatsImplCopyWith<$Res>
       double currentConsistency,
       double compoundGrowthRate,
       int daysLeft,
-      double potentialGrowth});
+      double potentialGrowth,
+      double weeklyConsistency,
+      int bestStreak});
 }
 
 /// @nodoc
@@ -144,6 +160,8 @@ class __$$PerformanceStatsImplCopyWithImpl<$Res>
     Object? compoundGrowthRate = null,
     Object? daysLeft = null,
     Object? potentialGrowth = null,
+    Object? weeklyConsistency = null,
+    Object? bestStreak = null,
   }) {
     return _then(_$PerformanceStatsImpl(
       projectedTotalCompletions: null == projectedTotalCompletions
@@ -178,6 +196,14 @@ class __$$PerformanceStatsImplCopyWithImpl<$Res>
           ? _value.potentialGrowth
           : potentialGrowth // ignore: cast_nullable_to_non_nullable
               as double,
+      weeklyConsistency: null == weeklyConsistency
+          ? _value.weeklyConsistency
+          : weeklyConsistency // ignore: cast_nullable_to_non_nullable
+              as double,
+      bestStreak: null == bestStreak
+          ? _value.bestStreak
+          : bestStreak // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -193,7 +219,9 @@ class _$PerformanceStatsImpl implements _PerformanceStats {
       required this.currentConsistency,
       required this.compoundGrowthRate,
       required this.daysLeft,
-      required this.potentialGrowth});
+      required this.potentialGrowth,
+      required this.weeklyConsistency,
+      required this.bestStreak});
 
   @override
   final int projectedTotalCompletions;
@@ -211,10 +239,14 @@ class _$PerformanceStatsImpl implements _PerformanceStats {
   final int daysLeft;
   @override
   final double potentialGrowth;
+  @override
+  final double weeklyConsistency;
+  @override
+  final int bestStreak;
 
   @override
   String toString() {
-    return 'PerformanceStats(projectedTotalCompletions: $projectedTotalCompletions, potentialCompletions: $potentialCompletions, roomForImprovement: $roomForImprovement, projectedStreak: $projectedStreak, currentConsistency: $currentConsistency, compoundGrowthRate: $compoundGrowthRate, daysLeft: $daysLeft, potentialGrowth: $potentialGrowth)';
+    return 'PerformanceStats(projectedTotalCompletions: $projectedTotalCompletions, potentialCompletions: $potentialCompletions, roomForImprovement: $roomForImprovement, projectedStreak: $projectedStreak, currentConsistency: $currentConsistency, compoundGrowthRate: $compoundGrowthRate, daysLeft: $daysLeft, potentialGrowth: $potentialGrowth, weeklyConsistency: $weeklyConsistency, bestStreak: $bestStreak)';
   }
 
   @override
@@ -238,7 +270,11 @@ class _$PerformanceStatsImpl implements _PerformanceStats {
             (identical(other.daysLeft, daysLeft) ||
                 other.daysLeft == daysLeft) &&
             (identical(other.potentialGrowth, potentialGrowth) ||
-                other.potentialGrowth == potentialGrowth));
+                other.potentialGrowth == potentialGrowth) &&
+            (identical(other.weeklyConsistency, weeklyConsistency) ||
+                other.weeklyConsistency == weeklyConsistency) &&
+            (identical(other.bestStreak, bestStreak) ||
+                other.bestStreak == bestStreak));
   }
 
   @override
@@ -251,7 +287,9 @@ class _$PerformanceStatsImpl implements _PerformanceStats {
       currentConsistency,
       compoundGrowthRate,
       daysLeft,
-      potentialGrowth);
+      potentialGrowth,
+      weeklyConsistency,
+      bestStreak);
 
   @JsonKey(ignore: true)
   @override
@@ -270,7 +308,9 @@ abstract class _PerformanceStats implements PerformanceStats {
       required final double currentConsistency,
       required final double compoundGrowthRate,
       required final int daysLeft,
-      required final double potentialGrowth}) = _$PerformanceStatsImpl;
+      required final double potentialGrowth,
+      required final double weeklyConsistency,
+      required final int bestStreak}) = _$PerformanceStatsImpl;
 
   @override
   int get projectedTotalCompletions;
@@ -288,6 +328,10 @@ abstract class _PerformanceStats implements PerformanceStats {
   int get daysLeft;
   @override
   double get potentialGrowth;
+  @override
+  double get weeklyConsistency;
+  @override
+  int get bestStreak;
   @override
   @JsonKey(ignore: true)
   _$$PerformanceStatsImplCopyWith<_$PerformanceStatsImpl> get copyWith =>

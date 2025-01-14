@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
@@ -11,24 +13,24 @@ class BottomCompletionAnimation extends StatefulWidget {
 }
 
 class _BottomCompletionAnimationState extends State<BottomCompletionAnimation> {
-  late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
     HapticFeedback.lightImpact();
+    close();
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  void close() {
+    Future.delayed(const Duration(milliseconds: 2500), () {
+      Navigator.of(context).pop();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomCenter,
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
       child: Container(
         margin: const EdgeInsets.only(bottom: 32),
         child: Lottie.asset('assets/lotties/small_celebration.json',
