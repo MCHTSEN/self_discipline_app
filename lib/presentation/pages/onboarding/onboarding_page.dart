@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:self_discipline_app/presentation/viewmodels/onboarding_provider.dart';
+import 'package:self_discipline_app/presentation/viewmodels/onboarding_navigation_provider.dart';
 
 @RoutePage()
 class OnboardingPage extends ConsumerStatefulWidget {
@@ -23,19 +24,15 @@ class OnboardingPage extends ConsumerStatefulWidget {
 }
 
 class _OnboardingPageState extends ConsumerState<OnboardingPage> {
-  late final PageController _pageController;
-  int _currentPage = 0;
-
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
+    // Use post-frame callback to initialize the provider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(onboardingNavigationProvider.notifier)
+          .initialize(widget.pages.length);
+    });
   }
 
   bool _shouldShowBackButton(int pageIndex) {
@@ -46,60 +43,57 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     return widget.showNextButtons?.elementAtOrNull(pageIndex) ?? true;
   }
 
-  void goToNextPage() {
-    if (_currentPage < widget.pages.length - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+  void _handleNextPage() {
+    final currentPage = ref.read(onboardingNavigationProvider).currentPage;
+    if (currentPage < widget.pages.length - 1) {
+      ref.read(onboardingNavigationProvider.notifier).goToNextPage();
     } else {
       widget.onComplete?.call();
     }
   }
 
-  void goToPreviousPage() {
-    _pageController.previousPage(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final isAnimationComplete = ref.watch(onboardingAnimationProvider);
+    final navigationState = ref.watch(onboardingNavigationProvider);
+    final currentPage = navigationState.currentPage;
 
     return Scaffold(
       body: Stack(
         children: [
           PageView.builder(
-            controller: _pageController,
+            controller: navigationState.pageController,
             itemCount: widget.pages.length,
-            onPageChanged: (index) => setState(() => _currentPage = index),
+            onPageChanged: (index) => ref
+                .read(onboardingNavigationProvider.notifier)
+                .setCurrentPage(index),
             itemBuilder: (context, index) => widget.pages[index],
           ),
-          if (_shouldShowBackButton(_currentPage) && isAnimationComplete)
+          if (_shouldShowBackButton(currentPage) && isAnimationComplete)
             Positioned(
               left: 16,
               bottom: 32,
               child: FloatingActionButton(
                 heroTag: 'previous',
-                onPressed: goToPreviousPage,
+                onPressed: ref
+                    .read(onboardingNavigationProvider.notifier)
+                    .goToPreviousPage,
                 backgroundColor: Theme.of(context).primaryColor,
                 shape: const CircleBorder(),
                 child: const Icon(Icons.arrow_back),
               ),
             ),
-          if (_shouldShowNextButton(_currentPage) && isAnimationComplete)
+          if (_shouldShowNextButton(currentPage) && isAnimationComplete)
             Positioned(
               right: 16,
               bottom: 32,
               child: FloatingActionButton(
                 heroTag: 'next',
-                onPressed: goToNextPage,
+                onPressed: _handleNextPage,
                 backgroundColor: Theme.of(context).primaryColor,
                 shape: const CircleBorder(),
                 child: Icon(
-                  _currentPage < widget.pages.length - 1
+                  currentPage < widget.pages.length - 1
                       ? Icons.arrow_forward
                       : Icons.check,
                 ),
@@ -117,9 +111,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   duration: const Duration(milliseconds: 300),
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   height: 8,
-                  width: _currentPage == index ? 24 : 8,
+                  width: currentPage == index ? 24 : 8,
                   decoration: BoxDecoration(
-                    color: _currentPage == index
+                    color: currentPage == index
                         ? Theme.of(context).primaryColor
                         : Theme.of(context).primaryColor.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(4),

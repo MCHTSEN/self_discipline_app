@@ -3,12 +3,16 @@ import 'package:lottie/lottie.dart';
 
 enum CustomLottie {
   flame,
-  explosion,
-  brain_explosion;
+  celebration,
+  achievement,
+  ai,
+  ai_circle,
+  small_celebration,
+  big_celebration;
 
   String get path => 'assets/lotties/$name.json';
 
   Widget toWidget({double width = 24.0, double height = 24}) {
-    return Lottie.asset(path, width: width, height: height);
+    return Lottie.asset(path, width: width, height: height,fit: BoxFit.fitWidth);
   }
 }

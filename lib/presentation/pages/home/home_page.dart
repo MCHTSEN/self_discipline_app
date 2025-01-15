@@ -13,7 +13,9 @@ import 'package:self_discipline_app/presentation/pages/home/components/daily_str
 import 'package:self_discipline_app/presentation/pages/home/components/habits_section.dart';
 import 'package:self_discipline_app/presentation/pages/home/components/header_section.dart';
 import 'package:self_discipline_app/presentation/pages/home/components/performance_widget.dart';
+import 'package:self_discipline_app/presentation/pages/onboarding/screens/identify_page.dart';
 import 'package:self_discipline_app/presentation/pages/onboarding/screens/first_screen.dart';
+import 'package:self_discipline_app/presentation/pages/onboarding/screens/social_proof_page.dart';
 import 'package:self_discipline_app/presentation/viewmodels/habit_list_notifier.dart';
 import 'package:self_discipline_app/presentation/widgets/dotted_divider.dart';
 import 'package:self_discipline_app/presentation/widgets/predict_line_chart.dart';
@@ -34,13 +36,13 @@ class HomePageState extends ConsumerState<HomePage> {
       OnboardingRoute(
         pages: [
           FirstScreen(),
-          Container(color: Colors.green, child: Text("3")),
-          Container(color: Colors.green, child: Text("3")),
+          IdentifyPage(),
+          SocialProofPage(),
         ],
-        showBackButtons: [false, true],
-        showNextButtons: [true, true],
+        showBackButtons: [false, false],
+        showNextButtons: [true, false],
         onComplete: () {
-          context.router.pop();
+          // Do something
         },
       ),
     );

@@ -4,6 +4,10 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:self_discipline_app/core/router/app_router.dart';
 import 'package:self_discipline_app/core/services/app_initializer.dart';
 import 'package:self_discipline_app/core/theme/app_theme.dart';
+import 'package:self_discipline_app/presentation/pages/onboarding/onboarding_page.dart';
+import 'package:self_discipline_app/presentation/pages/onboarding/screens/first_screen.dart';
+import 'package:self_discipline_app/presentation/pages/onboarding/screens/identify_page.dart';
+import 'package:self_discipline_app/presentation/pages/onboarding/screens/social_proof_page.dart';
 import 'package:self_discipline_app/presentation/viewmodels/settings_notifier.dart';
 
 void main() async {
@@ -21,13 +25,24 @@ class MyApp extends ConsumerWidget {
 
     return ResponsiveSizer(
       builder: (context, orientation, screenType) {
-        return MaterialApp.router(
+        return MaterialApp(
+          home: OnboardingPage(
+            pages: [
+              FirstScreen(),
+              IdentifyPage(),
+              SocialProofPage(),
+            ],
+            showBackButtons: [false, false, false],
+            showNextButtons: [true, false, false],
+            onComplete: () {
+              router.push(const HomeRoute());
+            },
+          ),
           debugShowCheckedModeBanner: false,
           title: 'Self Discipline',
           theme: AppTheme.lightTheme(),
           darkTheme: AppTheme.darkTheme(),
           themeMode: themeMode,
-          routerConfig: router.config(),
         );
       },
     );

@@ -43,6 +43,17 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const HomePage(),
       );
     },
+    IdentifyRoute.name: (routeData) {
+      final args = routeData.argsAs<IdentifyRouteArgs>(
+          orElse: () => const IdentifyRouteArgs());
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: IdentifyPage(
+          key: args.key,
+          onComplete: args.onComplete,
+        ),
+      );
+    },
     MainRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -66,6 +77,12 @@ abstract class _$AppRouter extends RootStackRouter {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
         child: const SettingsPage(),
+      );
+    },
+    SplashRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const SplashPage(),
       );
     },
     StatsRoute.name: (routeData) {
@@ -158,6 +175,44 @@ class HomeRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [IdentifyPage]
+class IdentifyRoute extends PageRouteInfo<IdentifyRouteArgs> {
+  IdentifyRoute({
+    Key? key,
+    VoidCallback? onComplete,
+    List<PageRouteInfo>? children,
+  }) : super(
+          IdentifyRoute.name,
+          args: IdentifyRouteArgs(
+            key: key,
+            onComplete: onComplete,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'IdentifyRoute';
+
+  static const PageInfo<IdentifyRouteArgs> page =
+      PageInfo<IdentifyRouteArgs>(name);
+}
+
+class IdentifyRouteArgs {
+  const IdentifyRouteArgs({
+    this.key,
+    this.onComplete,
+  });
+
+  final Key? key;
+
+  final VoidCallback? onComplete;
+
+  @override
+  String toString() {
+    return 'IdentifyRouteArgs{key: $key, onComplete: $onComplete}';
+  }
+}
+
+/// generated route for
 /// [MainPage]
 class MainRoute extends PageRouteInfo<void> {
   const MainRoute({List<PageRouteInfo>? children})
@@ -234,6 +289,20 @@ class SettingsRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'SettingsRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [SplashPage]
+class SplashRoute extends PageRouteInfo<void> {
+  const SplashRoute({List<PageRouteInfo>? children})
+      : super(
+          SplashRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'SplashRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

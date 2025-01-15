@@ -35,7 +35,7 @@ class _FirstScreenState extends ConsumerState<FirstScreen>
     // Container animasyonu için controller
     _containerController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 8),
+      duration: const Duration(seconds: 18),
     );
 
     _containerAnimation = Tween<double>(
@@ -156,10 +156,8 @@ class _FirstScreenState extends ConsumerState<FirstScreen>
                   animation: _containerAnimation,
                   builder: (context, child) {
                     return Container(
-                      width: MediaQuery.of(context).size.width *
-                          _containerAnimation.value /
-                          3,
-                      height: 70,
+                      width: _containerAnimation.value * 200,
+                      height: 60,
                       decoration: BoxDecoration(
                         borderRadius:
                             ProjectRadiusType.extraLargeRadius.allRadius,
