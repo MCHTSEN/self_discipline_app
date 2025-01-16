@@ -197,6 +197,12 @@ class HomePageState extends ConsumerState<HomePage> {
           Logger.info('Uncompleting habit: $habitId');
           ref.read(habitListProvider.notifier).uncompleteHabit(habitId);
         },
+        onQuantityAdd: (habitId, quantity) {
+          Logger.info('Updating quantity for habit: $habitId to $quantity');
+          ref
+              .read(habitListProvider.notifier)
+              .updateQuantity(habitId, quantity);
+        },
       ),
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, stack) => Center(child: Text('Error: $err')),

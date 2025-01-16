@@ -12,6 +12,7 @@ class HabitEntity {
   final int currentStreak;
   final int bestStreak;
   final DateTime createdAt;
+  final int currentQuantity; // Track current progress for quantity-based habits
 
   bool get isCompletedToday {
     final now = DateTime.now();
@@ -19,6 +20,10 @@ class HabitEntity {
         date.year == now.year &&
         date.month == now.month &&
         date.day == now.day);
+  }
+
+  bool get isQuantityCompleted {
+    return targetType == 'quantity' && currentQuantity >= targetValue;
   }
 
   DateTime? get lastCompletedAt =>
@@ -37,7 +42,8 @@ class HabitEntity {
     this.completions = const [],
     this.currentStreak = 0,
     this.bestStreak = 0,
-    required this.createdAt, DateTime? lastCompletedAt,
+    required this.createdAt,
+    this.currentQuantity = 0,
   });
 
   HabitEntity copyWith({
@@ -53,6 +59,7 @@ class HabitEntity {
     int? currentStreak,
     int? bestStreak,
     DateTime? createdAt,
+    int? currentQuantity,
   }) {
     return HabitEntity(
       id: id,
@@ -67,7 +74,8 @@ class HabitEntity {
       completions: completions ?? this.completions,
       currentStreak: currentStreak ?? this.currentStreak,
       bestStreak: bestStreak ?? this.bestStreak,
-      createdAt: createdAt?? this.createdAt,
+      createdAt: createdAt ?? this.createdAt,
+      currentQuantity: currentQuantity ?? this.currentQuantity,
     );
   }
 }

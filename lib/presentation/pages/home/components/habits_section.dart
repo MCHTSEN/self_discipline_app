@@ -9,12 +9,14 @@ class HabitsSection extends ConsumerWidget {
   final List<HabitEntity> habits;
   final Function(String) onCompleteHabit;
   final Function(String) onUncompleteHabit;
+  final Function(String, int) onQuantityAdd;
 
   const HabitsSection({
     super.key,
     required this.habits,
     required this.onCompleteHabit,
     required this.onUncompleteHabit,
+    required this.onQuantityAdd,
   });
 
   bool _shouldShowHabit(HabitEntity habit) {
@@ -172,6 +174,7 @@ class HabitsSection extends ConsumerWidget {
                 onComplete: () => onCompleteHabit(habit.id),
                 isCompleted: isCompleted,
                 onUncomplete: () => onUncompleteHabit(habit.id),
+                onQuantityAdd: (quantity) => onQuantityAdd(habit.id, quantity),
               ),
             );
           },

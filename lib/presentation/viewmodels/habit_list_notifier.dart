@@ -206,6 +206,32 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
       completions: newCompletions,
       currentStreak: newStreak,
       bestStreak: newBestStreak,
+      currentQuantity: habit.targetType == 'quantity' ? habit.targetValue : 0,
+    );
+
+    await _updateHabitInStateAndStorage(habitIndex, updatedHabit);
+  }
+
+  /// Updates the quantity progress for a habit
+  Future<void> updateQuantity(String habitId, int newQuantity) async {
+    final currentState = state;
+    if (!currentState.hasValue) return;
+
+    final habits = currentState.value!;
+    final habitIndex = habits.indexWhere((h) => h.id == habitId);
+    if (habitIndex == -1) return;
+
+    final habit = habits[habitIndex];
+
+    if (habit.targetType != 'quantity' || habit.isCompletedToday) return;
+
+    if (newQuantity >= habit.targetValue) {
+      await completeHabit(habitId);
+      return;
+    }
+
+    final updatedHabit = habit.copyWith(
+      currentQuantity: newQuantity,
     );
 
     await _updateHabitInStateAndStorage(habitIndex, updatedHabit);
@@ -242,6 +268,7 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
       completions: newCompletions,
       currentStreak: newStreak,
       bestStreak: habit.bestStreak,
+      currentQuantity: 0,
     );
 
     await _updateHabitInStateAndStorage(habitIndex, updatedHabit);

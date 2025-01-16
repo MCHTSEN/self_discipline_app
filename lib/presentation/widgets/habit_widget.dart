@@ -8,6 +8,7 @@ class HabitWidget extends StatelessWidget {
   final HabitEntity habit;
   final VoidCallback onComplete;
   final VoidCallback onUncomplete;
+  final Function(int) onQuantityAdd;
   final bool isCompleted;
 
   const HabitWidget({
@@ -15,6 +16,7 @@ class HabitWidget extends StatelessWidget {
     required this.habit,
     required this.onComplete,
     required this.onUncomplete,
+    required this.onQuantityAdd,
     required this.isCompleted,
   });
 
@@ -44,13 +46,44 @@ class HabitWidget extends StatelessWidget {
         leading: _habitIcon(),
         title: _title(context),
         subtitle: _infos(context, habitFrequencyString),
-        trailing: IconButton(
-            icon: Icon(
-              isCompleted ? Icons.check_circle : Icons.check_circle_outline,
-              color: isCompleted ? Color.fromARGB(255, 255, 109, 255) : null,
-            ),
-            onPressed: isCompleted ? onUncomplete : onComplete),
+        trailing: _buildTrailingButton(),
       ),
+    );
+  }
+
+  Widget _buildTrailingButton() {
+    if (isCompleted) {
+      return IconButton(
+        icon: Icon(
+          Icons.check_circle,
+          color: Color.fromARGB(255, 255, 109, 255),
+        ),
+        onPressed: onUncomplete,
+      );
+    }
+
+    if (habit.targetType == 'quantity' && habit.targetValue > 1) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '${habit.currentQuantity}/${habit.targetValue}',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.add_circle_outline),
+            onPressed: () => onQuantityAdd(habit.currentQuantity + 1),
+          ),
+        ],
+      );
+    }
+
+    return IconButton(
+      icon: Icon(Icons.check_circle_outline),
+      onPressed: onComplete,
     );
   }
 
