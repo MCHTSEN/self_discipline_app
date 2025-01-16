@@ -85,15 +85,11 @@ class HomePageState extends ConsumerState<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    PerformanceWidget(
-                        text: 'Keep pushing your limits!',
-                        icon: Icons.rocket_launch_rounded),
+                    PerformanceWidget(type: PerformanceMetricType.improvement),
                     Gap.extraLow,
                     DottedDivider(),
                     Gap.extraLow,
-                    PerformanceWidget(
-                        text: 'Stay consistent to build a streak!',
-                        icon: Icons.star),
+                    PerformanceWidget(type: PerformanceMetricType.streak),
                     Gap.extraLow,
                   ],
                 ),
