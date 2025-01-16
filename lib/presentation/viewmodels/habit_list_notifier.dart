@@ -44,17 +44,31 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
     _init();
   }
 
+  bool _shouldShowHabitOnDate(HabitEntity habit, DateTime date) {
+    final dayOfWeek = date.weekday;
+    final dayOfMonth = date.day;
+
+    switch (habit.frequency) {
+      case 'daily':
+        return true;
+      case 'weekly':
+        return habit.customDays?.contains(dayOfWeek) ?? false;
+      case 'custom':
+        return habit.customDays?.contains(dayOfMonth) ?? false;
+      default:
+        return false;
+    }
+  }
+
   int get currentStreak {
     int streak = 0;
     DateTime checkDate = DateTime.now().subtract(const Duration(days: 1));
 
-    // _isDateCompleted(checkDate) true döndükçe geriye gidip sayacı artır
     while (isDateCompleted(checkDate)) {
       streak++;
       checkDate = checkDate.subtract(const Duration(days: 1));
     }
 
-    // Bugün tamamlanmışsa streak'i artır
     if (isDateCompleted(DateTime.now())) {
       streak++;
     }
@@ -62,30 +76,25 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
     return streak;
   }
 
-  /// Kontrol: Belirli bir tarihte (date) var olan tüm habit'ler tamamlanmış mı?
   bool isDateCompleted(DateTime date) {
     final habitsState = state;
     return habitsState.when(
       data: (habits) {
         if (habits.isEmpty) return false;
 
-        // Sadece date tarihinden önce ya da aynı gün oluşturulmuş habit'leri kontrol ediyoruz
-        final habitsExistingOnDate = habits.where((habit) {
-          // createdAt, habit'in ne zaman oluşturulduğunu tutar
-          return habit.createdAt.isBefore(date) ||
-              _isSameDay(habit.createdAt, date);
+        // O tarihe kadar oluşturulmuş ve o tarihte yapılması gereken habitleri filtrele
+        final habitsForDate = habits.where((habit) {
+          return (habit.createdAt.isBefore(date) ||
+                  _isSameDay(habit.createdAt, date)) &&
+              _shouldShowHabitOnDate(habit, date);
         }).toList();
 
-        // O güne kadar henüz hiç habit oluşturulmamışsa false dönelim
-        if (habitsExistingOnDate.isEmpty) return false;
+        if (habitsForDate.isEmpty) return false;
 
-        // Bu tarihe kadar var olan habit'lerin hepsinde, date günü bir completion var mı?
-        return habitsExistingOnDate.every(
+        // O güne ait habitlerin hepsi tamamlanmış mı kontrol et
+        return habitsForDate.every(
           (habit) => habit.completions.any(
-            (completion) =>
-                completion.year == date.year &&
-                completion.month == date.month &&
-                completion.day == date.day,
+            (completion) => _isSameDay(completion, date),
           ),
         );
       },
@@ -176,13 +185,11 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
 
     final newCompletions = [...habit.completions, now];
 
-    // Check if all habits for today are completed
-    bool allHabitsCompletedToday = habits.every((h) {
+    // Sadece bugün için planlanmış habitleri kontrol et
+    bool allHabitsCompletedToday =
+        habits.where((h) => _shouldShowHabitOnDate(h, now)).every((h) {
       if (h.id == habitId) return true;
-      return h.completions.any((completion) =>
-          completion.year == now.year &&
-          completion.month == now.month &&
-          completion.day == now.day);
+      return h.completions.any((completion) => _isSameDay(completion, now));
     });
 
     int newStreak = habit.currentStreak;
@@ -217,20 +224,14 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
     final habit = habits[habitIndex];
     final now = DateTime.now();
 
-    final newCompletions = habit.completions
-        .where((date) =>
-            date.year != now.year ||
-            date.month != now.month ||
-            date.day != now.day)
-        .toList();
+    final newCompletions =
+        habit.completions.where((date) => !_isSameDay(date, now)).toList();
 
     int newStreak = habit.currentStreak;
-    bool anyHabitCompletedToday = habits.any((h) {
+    bool anyHabitCompletedToday =
+        habits.where((h) => _shouldShowHabitOnDate(h, now)).any((h) {
       if (h.id == habitId) return false;
-      return h.completions.any((completion) =>
-          completion.year == now.year &&
-          completion.month == now.month &&
-          completion.day == now.day);
+      return h.completions.any((completion) => _isSameDay(completion, now));
     });
 
     if (!anyHabitCompletedToday) {
@@ -259,23 +260,78 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
     final lastCompletion = habit.completions.last;
     final difference = now.difference(lastCompletion).inDays;
 
-    if (habit.frequency == 'daily') {
-      if (difference == 0) {
-        return habit.currentStreak + 1;
-      } else if (difference == 1) {
-        return habit.currentStreak + 1;
-      } else {
+    switch (habit.frequency) {
+      case 'daily':
+        // For daily habits, streak continues if completed today or yesterday
+        if (difference <= 1) {
+          return habit.currentStreak + 1;
+        }
         return 1;
-      }
-    } else if (habit.frequency == 'weekly') {
-      if (difference <= 7) {
-        return habit.currentStreak + 1;
-      } else {
-        return 1;
-      }
-    }
 
-    return 1;
+      case 'weekly':
+        // For weekly habits, check if the completion is within the required days
+        if (habit.customDays == null || habit.customDays!.isEmpty) {
+          return 1; // Invalid configuration
+        }
+
+        // Get the last required day before today
+        final todayWeekday = now.weekday;
+        final lastRequiredDay = habit.customDays!
+            .where((day) => day < todayWeekday)
+            .fold<int>(0, (prev, curr) => curr > prev ? curr : prev);
+
+        // If no previous required day this week, check last week's last day
+        final daysToCheck = lastRequiredDay == 0
+            ? habit.customDays!.reduce((a, b) => a > b ? a : b)
+            : lastRequiredDay;
+
+        // Calculate the maximum allowed difference based on the days
+        final maxAllowedDifference =
+            lastRequiredDay == 0 ? 7 : (todayWeekday - daysToCheck);
+
+        if (difference <= maxAllowedDifference) {
+          return habit.currentStreak + 1;
+        }
+        return 1;
+
+      case 'custom': // Monthly
+        // For monthly habits, check if the completion is within the required days
+        if (habit.customDays == null || habit.customDays!.isEmpty) {
+          return 1; // Invalid configuration
+        }
+
+        final todayDay = now.day;
+        // Get the last required day before today
+        final lastRequiredDay = habit.customDays!
+            .where((day) => day < todayDay)
+            .fold<int>(0, (prev, curr) => curr > prev ? curr : prev);
+
+        // If no previous required day this month, check last month's last day
+        final daysToCheck = lastRequiredDay == 0
+            ? habit.customDays!.reduce((a, b) => a > b ? a : b)
+            : lastRequiredDay;
+
+        // Calculate the maximum allowed difference based on the days
+        final maxAllowedDifference = lastRequiredDay == 0
+            ? _getDaysInMonth(now.month - 1, now.year) // Previous month
+            : (todayDay - daysToCheck);
+
+        if (difference <= maxAllowedDifference) {
+          return habit.currentStreak + 1;
+        }
+        return 1;
+
+      default:
+        return 1;
+    }
+  }
+
+  int _getDaysInMonth(int month, int year) {
+    if (month == 0) {
+      month = 12;
+      year--;
+    }
+    return DateTime(year, month + 1, 0).day;
   }
 
   /// Updates a habit in both state and persistent storage
@@ -293,5 +349,135 @@ class HabitListNotifier extends StateNotifier<AsyncValue<List<HabitEntity>>> {
   /// Shows a celebration animation for streak milestones
   void _showStreakCelebration(int streak) {
     streakCelebrationNotifier.showCelebration(streak);
+  }
+
+  /// Gets the total number of habits scheduled for today
+  int getTotalHabitsForToday() {
+    final now = DateTime.now();
+    return state.when(
+      data: (habits) {
+        return habits.where((h) => _shouldShowHabitOnDate(h, now)).length;
+      },
+      loading: () => 0,
+      error: (_, __) => 0,
+    );
+  }
+
+  /// Gets the number of completed habits for today
+  int getCompletedHabitsForToday() {
+    final now = DateTime.now();
+    return state.when(
+      data: (habits) {
+        return habits
+            .where((h) => _shouldShowHabitOnDate(h, now))
+            .where((h) => h.completions.any((c) => _isSameDay(c, now)))
+            .length;
+      },
+      loading: () => 0,
+      error: (_, __) => 0,
+    );
+  }
+
+  /// Gets the completion rate for a specific date
+  double getCompletionRateForDate(DateTime date) {
+    return state.when(
+      data: (habits) {
+        final habitsForDate =
+            habits.where((h) => _shouldShowHabitOnDate(h, date)).toList();
+        if (habitsForDate.isEmpty) return 0.0;
+
+        final completedHabits = habitsForDate
+            .where((h) => h.completions.any((c) => _isSameDay(c, date)))
+            .length;
+
+        return completedHabits / habitsForDate.length;
+      },
+      loading: () => 0.0,
+      error: (_, __) => 0.0,
+    );
+  }
+
+  /// Gets the completion rate for the last 7 days
+  double getWeeklyCompletionRate() {
+    final now = DateTime.now();
+    double totalRate = 0.0;
+    int daysWithHabits = 0;
+
+    for (int i = 0; i < 7; i++) {
+      final date = now.subtract(Duration(days: i));
+      final rate = getCompletionRateForDate(date);
+      if (rate > 0) {
+        totalRate += rate;
+        daysWithHabits++;
+      }
+    }
+
+    return daysWithHabits > 0 ? totalRate / daysWithHabits : 0.0;
+  }
+
+  /// Gets the completion rate for the last 30 days
+  double getMonthlyCompletionRate() {
+    final now = DateTime.now();
+    double totalRate = 0.0;
+    int daysWithHabits = 0;
+
+    for (int i = 0; i < 30; i++) {
+      final date = now.subtract(Duration(days: i));
+      final rate = getCompletionRateForDate(date);
+      if (rate > 0) {
+        totalRate += rate;
+        daysWithHabits++;
+      }
+    }
+
+    return daysWithHabits > 0 ? totalRate / daysWithHabits : 0.0;
+  }
+
+  /// Gets the number of habits completed in the last 7 days
+  int getHabitsCompletedThisWeek() {
+    final now = DateTime.now();
+    final weekStart = now.subtract(Duration(days: 6));
+    return state.when(
+      data: (habits) {
+        int total = 0;
+        for (var habit in habits) {
+          for (var date = weekStart;
+              date.isBefore(now) || _isSameDay(date, now);
+              date = date.add(const Duration(days: 1))) {
+            if (_shouldShowHabitOnDate(habit, date) &&
+                habit.completions.any((c) => _isSameDay(c, date))) {
+              total++;
+            }
+          }
+        }
+        return total;
+      },
+      loading: () => 0,
+      error: (_, __) => 0,
+    );
+  }
+
+  /// Gets the number of habits completed in the last 30 days
+  int getHabitsCompletedThisMonth() {
+    final now = DateTime.now();
+    final monthStart = now.subtract(const Duration(days: 29));
+    return state.when(
+      data: (habits) {
+        int total = 0;
+        for (var habit in habits) {
+          for (var date = monthStart;
+              date.isBefore(now) || _isSameDay(date, now);
+              date = date.add(const Duration(days: 1))) {
+            if (_shouldShowHabitOnDate(habit, date) &&
+                habit.completions.any((c) => _isSameDay(c, date))) {
+              total++;
+            }
+          }
+        }
+        return total;
+      },
+      loading: () => 0,
+      error: (_, __) => 0,
+    );
   }
 }

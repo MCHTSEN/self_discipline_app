@@ -19,14 +19,19 @@ class HabitsSection extends ConsumerWidget {
 
   bool _shouldShowHabit(HabitEntity habit) {
     final now = DateTime.now();
-    final dayOfWeek = now.weekday;
+    final dayOfWeek = now.weekday; // 1 = Monday, 7 = Sunday
+    final dayOfMonth = now.day;
 
-    if (habit.frequency == 'daily') {
-      return true;
-    } else if (habit.frequency == 'custom' && habit.customDays != null) {
-      return habit.customDays!.contains(dayOfWeek);
+    switch (habit.frequency) {
+      case 'daily':
+        return true;
+      case 'weekly':
+        return habit.customDays?.contains(dayOfWeek) ?? false;
+      case 'custom':
+        return habit.customDays?.contains(dayOfMonth) ?? false;
+      default:
+        return false;
     }
-    return false;
   }
 
   @override
@@ -121,7 +126,7 @@ class HabitsSection extends ConsumerWidget {
             child: CustomScrollView(
               primary: false,
               slivers: [
-                 if (completedHabits.isNotEmpty) ...[
+                if (completedHabits.isNotEmpty) ...[
                   _buildSectionHeader(context, 'Completed Today'),
                   _buildHabitsList(completedHabits, true),
                 ],
@@ -129,7 +134,6 @@ class HabitsSection extends ConsumerWidget {
                   _buildSectionHeader(context, 'To Complete'),
                   _buildHabitsList(uncompletedHabits, false),
                 ],
-               
               ],
             ),
           ),

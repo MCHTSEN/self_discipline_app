@@ -29,14 +29,15 @@ class _StatsPageState extends ConsumerState<StatsPage> {
 
   (int completed, int total, String rate, int streak) _calculateStats(
       List<HabitEntity> habits, TimePeriod period) {
+    final habitListNotifier = ref.read(habitListProvider.notifier);
     int completedHabits = 0;
-    int totalHabits = habits.length;
+    int totalHabits = 0;
     int longestStreak = 0;
 
     switch (period) {
       case TimePeriod.day:
-        completedHabits =
-            habits.where((habit) => habit.isCompletedToday).length;
+        completedHabits = habitListNotifier.getCompletedHabitsForToday();
+        totalHabits = habitListNotifier.getTotalHabitsForToday();
         longestStreak = habits.fold(
             0,
             (max, habit) =>
@@ -45,32 +46,43 @@ class _StatsPageState extends ConsumerState<StatsPage> {
       case TimePeriod.month:
         final now = DateTime.now();
         final startOfMonth = DateTime(now.year, now.month, 1);
-        for (var habit in habits) {
-          final monthlyCompletions = habit.completions
-              .where((date) =>
-                  date.isAfter(
-                      startOfMonth.subtract(const Duration(days: 1))) &&
-                  date.isBefore(now.add(const Duration(days: 1))))
+        for (var date = startOfMonth;
+            date.isBefore(now) || _isSameDay(date, now);
+            date = date.add(const Duration(days: 1))) {
+          final habitsForDate = habits
+              .where((h) =>
+                  (h.createdAt.isBefore(date) ||
+                      _isSameDay(h.createdAt, date)) &&
+                  _shouldShowHabitOnDate(h, date))
+              .toList();
+
+          totalHabits += habitsForDate.length;
+          completedHabits += habitsForDate
+              .where((h) => h.completions
+                  .any((completion) => _isSameDay(completion, date)))
               .length;
-          completedHabits += monthlyCompletions;
         }
-        totalHabits = habits.length * DateTime.now().day;
         break;
       case TimePeriod.year:
         final now = DateTime.now();
         final startOfYear = DateTime(now.year, 1, 1);
-        final daysInYear =
-            now.difference(startOfYear).inDays + 1; // +1 to include today
 
-        for (var habit in habits) {
-          final yearlyCompletions = habit.completions
-              .where((date) =>
-                  date.isAfter(startOfYear.subtract(const Duration(days: 1))) &&
-                  date.isBefore(now.add(const Duration(days: 1))))
+        for (var date = startOfYear;
+            date.isBefore(now) || _isSameDay(date, now);
+            date = date.add(const Duration(days: 1))) {
+          final habitsForDate = habits
+              .where((h) =>
+                  (h.createdAt.isBefore(date) ||
+                      _isSameDay(h.createdAt, date)) &&
+                  _shouldShowHabitOnDate(h, date))
+              .toList();
+
+          totalHabits += habitsForDate.length;
+          completedHabits += habitsForDate
+              .where((h) => h.completions
+                  .any((completion) => _isSameDay(completion, date)))
               .length;
-          completedHabits += yearlyCompletions;
         }
-        totalHabits = habits.length * daysInYear;
         break;
     }
 
@@ -79,6 +91,26 @@ class _StatsPageState extends ConsumerState<StatsPage> {
         : '0';
 
     return (completedHabits, totalHabits, completionRate, longestStreak);
+  }
+
+  bool _isSameDay(DateTime d1, DateTime d2) {
+    return d1.year == d2.year && d1.month == d2.month && d1.day == d2.day;
+  }
+
+  bool _shouldShowHabitOnDate(HabitEntity habit, DateTime date) {
+    final dayOfWeek = date.weekday;
+    final dayOfMonth = date.day;
+
+    switch (habit.frequency) {
+      case 'daily':
+        return true;
+      case 'weekly':
+        return habit.customDays?.contains(dayOfWeek) ?? false;
+      case 'custom':
+        return habit.customDays?.contains(dayOfMonth) ?? false;
+      default:
+        return false;
+    }
   }
 
   Widget _buildStatsSection(
@@ -317,13 +349,34 @@ class _StatsPageState extends ConsumerState<StatsPage> {
         (curr, next) => curr.currentStreak > next.currentStreak ? curr : next);
 
     // Find the most productive day
-    final allCompletions = habits.expand((habit) => habit.completions).toList();
+    final now = DateTime.now();
+    final startOfYear = DateTime(now.year, 1, 1);
+    Map<DateTime, int> completionsByDay = {};
 
-    final groupedByDay = groupBy(
-        allCompletions, (date) => DateTime(date.year, date.month, date.day));
+    for (var date = startOfYear;
+        date.isBefore(now) || _isSameDay(date, now);
+        date = date.add(const Duration(days: 1))) {
+      final habitsForDate = habits
+          .where((h) =>
+              (h.createdAt.isBefore(date) || _isSameDay(h.createdAt, date)) &&
+              _shouldShowHabitOnDate(h, date))
+          .toList();
 
-    final bestDay = groupedByDay.entries.reduce(
-        (curr, next) => curr.value.length > next.value.length ? curr : next);
+      final completedCount = habitsForDate
+          .where((h) =>
+              h.completions.any((completion) => _isSameDay(completion, date)))
+          .length;
+
+      if (completedCount > 0) {
+        completionsByDay[DateTime(date.year, date.month, date.day)] =
+            completedCount;
+      }
+    }
+
+    final bestDay = completionsByDay.entries.isEmpty
+        ? null
+        : completionsByDay.entries
+            .reduce((curr, next) => curr.value > next.value ? curr : next);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -349,19 +402,20 @@ class _StatsPageState extends ConsumerState<StatsPage> {
           ListTile(
             leading: Icon(Icons.local_fire_department,
                 color: Theme.of(context).primaryColor),
-            title: Text('Longest Streak'),
+            title: const Text('Longest Streak'),
             subtitle:
                 Text('${bestHabit.title} - ${bestHabit.currentStreak} days'),
           ),
-          ListTile(
-            leading: Icon(Icons.calendar_today,
-                color: Theme.of(context).primaryColor),
-            title: Text('Most Productive Day'),
-            subtitle: Text(
-              '${bestDay.value.length} habits completed on '
-              '${bestDay.key.day}/${bestDay.key.month}/${bestDay.key.year}',
+          if (bestDay != null)
+            ListTile(
+              leading: Icon(Icons.calendar_today,
+                  color: Theme.of(context).primaryColor),
+              title: const Text('Most Productive Day'),
+              subtitle: Text(
+                '${bestDay.value} habits completed on '
+                '${bestDay.key.day}/${bestDay.key.month}/${bestDay.key.year}',
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -374,19 +428,25 @@ class _StatsPageState extends ConsumerState<StatsPage> {
     final now = DateTime.now();
     final weekStart = now.subtract(Duration(days: now.weekday - 1));
 
-    final List<({String day, int completed})> weeklyData =
+    final List<({String day, int completed, int total})> weeklyData =
         List.generate(7, (index) {
       final date = weekStart.add(Duration(days: index));
-      final completionsForDay = habits
-          .where((habit) => habit.completions.any((completion) =>
-              completion.year == date.year &&
-              completion.month == date.month &&
-              completion.day == date.day))
+
+      final habitsForDay = habits
+          .where((h) =>
+              (h.createdAt.isBefore(date) || _isSameDay(h.createdAt, date)) &&
+              _shouldShowHabitOnDate(h, date))
+          .toList();
+
+      final completionsForDay = habitsForDay
+          .where((habit) => habit.completions
+              .any((completion) => _isSameDay(completion, date)))
           .length;
 
       return (
         day: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index],
         completed: completionsForDay,
+        total: habitsForDay.length,
       );
     });
 
@@ -417,8 +477,8 @@ class _StatsPageState extends ConsumerState<StatsPage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: weeklyData.map((data) {
-                final double height = data.completed > 0
-                    ? (data.completed * 60 / habits.length).clamp(20.0, 60.0)
+                final double height = data.total > 0
+                    ? (data.completed * 60 / data.total).clamp(20.0, 60.0)
                     : 20.0;
 
                 return Column(
@@ -437,6 +497,9 @@ class _StatsPageState extends ConsumerState<StatsPage> {
                     Gap.low,
                     Text(data.day,
                         style: Theme.of(context).textTheme.bodySmall),
+                    if (data.total > 0)
+                      Text('${data.completed}/${data.total}',
+                          style: Theme.of(context).textTheme.bodySmall),
                   ],
                 );
               }).toList(),
@@ -451,20 +514,25 @@ class _StatsPageState extends ConsumerState<StatsPage> {
       BuildContext context, List<HabitEntity> habits) {
     if (habits.isEmpty) return const SizedBox.shrink();
 
-    // Calculate current consistency from start of year
     final now = DateTime.now();
     final startOfYear = DateTime(now.year, 1, 1);
-    final daysSinceYearStart =
-        now.difference(startOfYear).inDays + 1; // Including today
-
-    int totalPossibleCompletions = habits.length * daysSinceYearStart;
+    int totalPossibleCompletions = 0;
     int actualCompletions = 0;
 
-    for (var habit in habits) {
-      actualCompletions += habit.completions
-          .where((date) =>
-              date.isAfter(startOfYear.subtract(const Duration(days: 1))) &&
-              date.isBefore(now.add(const Duration(days: 1))))
+    // Calculate from start of year to today
+    for (var date = startOfYear;
+        date.isBefore(now) || _isSameDay(date, now);
+        date = date.add(const Duration(days: 1))) {
+      final habitsForDate = habits
+          .where((h) =>
+              (h.createdAt.isBefore(date) || _isSameDay(h.createdAt, date)) &&
+              _shouldShowHabitOnDate(h, date))
+          .toList();
+
+      totalPossibleCompletions += habitsForDate.length;
+      actualCompletions += habitsForDate
+          .where((h) =>
+              h.completions.any((completion) => _isSameDay(completion, date)))
           .length;
     }
 
@@ -475,18 +543,34 @@ class _StatsPageState extends ConsumerState<StatsPage> {
     // Project remaining year outcomes
     final daysLeftInYear =
         DateTime(now.year, 12, 31).difference(now).inDays + 1;
+    int projectedRemainingPossible = 0;
+
+    // Calculate projected completions for remaining days
+    for (var date = now.add(const Duration(days: 1));
+        date.isBefore(DateTime(now.year, 12, 31));
+        date = date.add(const Duration(days: 1))) {
+      final habitsForDate = habits
+          .where((h) =>
+              (h.createdAt.isBefore(date) || _isSameDay(h.createdAt, date)) &&
+              _shouldShowHabitOnDate(h, date))
+          .toList();
+      projectedRemainingPossible += habitsForDate.length;
+    }
+
     final projectedRemainingCompletions =
-        (daysLeftInYear * habits.length * currentConsistency).round();
+        (projectedRemainingPossible * currentConsistency).round();
     final projectedTotalCompletions =
         actualCompletions + projectedRemainingCompletions;
-    final potentialCompletions = 365 * habits.length;
+    final potentialCompletions =
+        totalPossibleCompletions + projectedRemainingPossible;
 
     // Calculate improvement potential
-    final roomForImprovement =
-        ((potentialCompletions - projectedTotalCompletions) /
+    final roomForImprovement = potentialCompletions > 0
+        ? ((potentialCompletions - projectedTotalCompletions) /
                 potentialCompletions *
                 100)
-            .round();
+            .round()
+        : 0;
 
     // Calculate projected streak based on current performance
     final averageCurrentStreak = habits.isEmpty
@@ -539,7 +623,7 @@ class _StatsPageState extends ConsumerState<StatsPage> {
                 color: Theme.of(context).primaryColor),
             title: const Text('Current Progress'),
             subtitle: Text(
-              '$actualCompletions completions so far this year',
+              '$actualCompletions completions out of $totalPossibleCompletions possible',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
@@ -548,7 +632,7 @@ class _StatsPageState extends ConsumerState<StatsPage> {
                 color: Theme.of(context).primaryColor),
             title: const Text('Projected Year End'),
             subtitle: Text(
-              'Expected to reach $projectedTotalCompletions out of $potentialCompletions completions',
+              'Expected to reach $projectedTotalCompletions out of $potentialCompletions possible completions',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),

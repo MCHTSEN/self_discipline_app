@@ -38,12 +38,17 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
 
   static const List<int> predefinedDurations = [15, 30, 45, 60, 90];
   static const List<int> predefinedQuantities = [1, 2, 3, 5, 10];
-  static const List<String> frequencies = [
-    'daily',
-    'weekly',
-    'monthly',
-    'custom'
-  ];
+  static const List<String> frequencies = ['daily', 'weekly', 'custom'];
+
+  static const Map<int, String> weekDays = {
+    1: 'Pazartesi',
+    2: 'Salı',
+    3: 'Çarşamba',
+    4: 'Perşembe',
+    5: 'Cuma',
+    6: 'Cumartesi',
+    7: 'Pazar',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -73,11 +78,7 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
                                 Gap.normal,
                                 _buildTargetValueCard(),
                                 Gap.normal,
-                                _buildFrequencyCard(),
-                                if (_frequency == 'custom') ...[
-                                  Gap.normal,
-                                  _buildCustomDaysSelector(),
-                                ],
+                                _buildFrequencySection(),
                                 Gap.normal,
                                 _buildNotificationCard(),
                                 Gap.normal,
@@ -278,6 +279,17 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildFrequencySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildFrequencyCard(),
+        if (_frequency == 'weekly') _buildWeekDaysSelector(),
+        if (_frequency == 'custom') _buildMonthDaysSelector(),
+      ],
     );
   }
 
@@ -543,46 +555,87 @@ class _HabitCreationPageState extends ConsumerState<HabitCreationPage> {
     );
   }
 
-  Widget _buildCustomDaysSelector() {
-    return _buildCard(
-      title: 'CUSTOM DAYS',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: List.generate(31, (index) {
-              final day = index + 1;
-              return FilterChip(
-                label: Text(day.toString()),
-                selected: _customDays?.contains(day) ?? false,
-                onSelected: (selected) {
-                  setState(() {
-                    if (_customDays == null) {
-                      _customDays = [];
-                    }
-                    if (selected) {
-                      _customDays!.add(day);
-                    } else {
-                      _customDays!.remove(day);
-                    }
-                    _customDays!.sort();
-                  });
-                },
-                selectedColor: AppSecondaryColors.liquidLava.withOpacity(0.2),
-                checkmarkColor: AppSecondaryColors.liquidLava,
-              );
-            }),
-          ),
-          if (_customDays != null && _customDays!.isNotEmpty) ...[
-            Gap.normal,
+  Widget _buildWeekDaysSelector() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Text(
-              'Selected days: ${_customDays!.join(", ")}',
-              style: Theme.of(context).textTheme.bodySmall,
+              'HAFTANIN GÜNLERİ',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: weekDays.entries.map((entry) {
+                final isSelected = _customDays?.contains(entry.key) ?? false;
+                return FilterChip(
+                  label: Text(entry.value),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    setState(() {
+                      if (_customDays == null) {
+                        _customDays = [];
+                      }
+                      if (selected) {
+                        _customDays!.add(entry.key);
+                      } else {
+                        _customDays!.remove(entry.key);
+                      }
+                      _customDays!.sort();
+                    });
+                  },
+                );
+              }).toList(),
             ),
           ],
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMonthDaysSelector() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'AYIN GÜNLERİ',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: List.generate(31, (index) {
+                final day = index + 1;
+                final isSelected = _customDays?.contains(day) ?? false;
+                return FilterChip(
+                  label: Text(day.toString()),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    setState(() {
+                      if (_customDays == null) {
+                        _customDays = [];
+                      }
+                      if (selected) {
+                        _customDays!.add(day);
+                      } else {
+                        _customDays!.remove(day);
+                      }
+                      _customDays!.sort();
+                    });
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
