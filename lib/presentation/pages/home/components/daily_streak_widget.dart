@@ -33,7 +33,9 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
   void initState() {
     super.initState();
     _initializeControllers();
-    _scrollToCurrentWeek();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToCurrentWeek();
+    });
   }
 
   void _initializeControllers() {
@@ -50,12 +52,8 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
     super.dispose();
   }
 
-  /// Bu metot, sayfa controller ekrana mount olmadan çağrılırsa hata verir.
-  /// O yüzden mounted + hasClients kontrolü ekliyoruz.
   void _scrollToCurrentWeek() {
-    if (!mounted) return;
-    if (!_pageController.hasClients) return;
-
+    if (!mounted || !_pageController.hasClients) return;
     _pageController.animateToPage(
       currentWeek,
       duration: const Duration(milliseconds: 300),
@@ -63,22 +61,6 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
     );
   }
 
-  /// Returns the current streak count from all habits
-  int _getCurrentStreak() {
-    final habitsState = ref.watch(habitListProvider);
-    return habitsState.when(
-      data: (habits) {
-        if (habits.isEmpty) return 0;
-        return habits
-            .map((h) => h.currentStreak)
-            .reduce((a, b) => a > b ? a : b);
-      },
-      loading: () => 0,
-      error: (_, __) => 0,
-    );
-  }
-
-  /// Haftalık görünümdeki günleri hesaplar
   List<DateTime> _getDaysInWeek(int week) {
     final List<DateTime> days = [];
     final int firstDayOffset = startDate.weekday - 1;
@@ -104,110 +86,119 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
     final screenWidth = MediaQuery.of(context).size.width;
     final dayWidth = (screenWidth - 130) / 7;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final habitState = ref.watch(habitListProvider.notifier);
-    final Color firstColor = Colors.black;
-    final Color secondaryColor = Colors.grey[700]!;
-    final currentMonrh = DateFormat('MMMM').format(currentDate);
+    final habitState = ref.watch(habitListProvider);
 
-    return Container(
-      width: double.infinity,
-      height: 80,
-      child: PageView.builder(
-        controller: _pageController,
-        itemCount: totalWeeks,
-        itemBuilder: (context, weekIndex) {
-          final weekDays = _getDaysInWeek(weekIndex);
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: weekDays.map((date) {
-                  final bool isCompleted = habitState.isDateCompleted(date);
-                  final bool isCurrentDay = date.day == currentDate.day &&
-                      date.month == currentDate.month;
-                  final bool isCurrentMonth = date.month == currentDate.month;
+    return habitState.when(
+      data: (habits) {
+        final habitNotifier = ref.watch(habitListProvider.notifier);
+        final Color firstColor = Colors.black;
+        final Color secondaryColor = Colors.grey[700]!;
+        final currentMonth = DateFormat('MMMM').format(currentDate);
 
-                  final cardColor =
-                      (isCurrentDay) ? Colors.white : Colors.transparent;
+        return Container(
+          width: double.infinity,
+          height: 80,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: totalWeeks,
+            itemBuilder: (context, weekIndex) {
+              final weekDays = _getDaysInWeek(weekIndex);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: weekDays.map((date) {
+                      final bool isCompleted =
+                          habitNotifier.isDateCompleted(date);
+                      final bool isCurrentDay = date.day == currentDate.day &&
+                          date.month == currentDate.month;
+                      final bool isCurrentMonth =
+                          date.month == currentDate.month;
 
-                  final borderColor =
-                      isCurrentDay ? Colors.grey : Colors.transparent;
+                      final cardColor =
+                          (isCurrentDay) ? Colors.white : Colors.transparent;
 
-                  final dayTextColor = isCompleted
-                      ? Colors.white
-                      : isCurrentDay
-                          ? Colors.red
-                          : secondaryColor;
+                      final borderColor =
+                          isCurrentDay ? Colors.grey : Colors.transparent;
 
-                  final dayNumberTextColor =
-                      isCompleted ? Colors.white : secondaryColor;
+                      final dayTextColor = isCompleted
+                          ? Colors.white
+                          : isCurrentDay
+                              ? Colors.red
+                              : secondaryColor;
 
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: dayWidth,
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        decoration: BoxDecoration(
-                          gradient: isCompleted
-                              ? LinearGradient(
-                                  colors: [
-                                    const Color.fromARGB(255, 234, 15, 245)
-                                        .withOpacity(.3),
-                                    const Color.fromARGB(255, 157, 15, 245)
-                                        .withOpacity(.6),
-                                  ],
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                )
-                              : null,
-                          color: isCompleted ? null : cardColor,
-                          borderRadius:
-                              ProjectRadiusType.normalRadius.allRadius,
-                          border: Border.all(color: borderColor, width: 0.6),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              // "6\nTue" format
-                              DateFormat('d').format(date),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                color: dayNumberTextColor,
-                                fontWeight: isCurrentMonth
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                              ),
+                      final dayNumberTextColor =
+                          isCompleted ? Colors.white : secondaryColor;
+
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: dayWidth,
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            decoration: BoxDecoration(
+                              gradient: isCompleted
+                                  ? LinearGradient(
+                                      colors: [
+                                        const Color.fromARGB(255, 234, 15, 245)
+                                            .withOpacity(.3),
+                                        const Color.fromARGB(255, 157, 15, 245)
+                                            .withOpacity(.6),
+                                      ],
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                    )
+                                  : null,
+                              color: isCompleted ? null : cardColor,
+                              borderRadius:
+                                  ProjectRadiusType.normalRadius.allRadius,
+                              border:
+                                  Border.all(color: borderColor, width: 0.6),
                             ),
-                            Text(
-                              // "6\nTue" format
-                              DateFormat('EEE').format(date).toUpperCase(),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: dayTextColor,
-                                fontWeight: isCurrentMonth
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                              ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  DateFormat('d').format(date),
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    color: dayNumberTextColor,
+                                    fontWeight: isCurrentMonth
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                                Text(
+                                  DateFormat('EEE').format(date).toUpperCase(),
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: dayTextColor,
+                                    fontWeight: isCurrentMonth
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        width: 2,
-                      ),
-                    ],
-                  );
-                }).toList(),
-              ),
-            ],
-          );
-        },
-      ),
+                          ),
+                          SizedBox(
+                            width: 2,
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Error: $error')),
     );
   }
 }
