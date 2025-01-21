@@ -19,6 +19,9 @@ class DailyStreakWidget extends ConsumerStatefulWidget {
 class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
   DateTime currentDate = DateTime.now();
   late ScrollController _scrollController;
+  late PageController _pageController;
+  late int totalWeeks;
+  late int currentWeek;
 
   /// Returns the first day of the current month
   DateTime get startDate => DateTime(currentDate.year, currentDate.month, 1);
@@ -32,36 +35,36 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
+    _initializeControllers();
     // Scroll to current date after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToCurrentDate();
+      _scrollToCurrentWeek();
     });
+  }
+
+  void _initializeControllers() {
+    _scrollController = ScrollController();
+    totalWeeks = ((endDate.day + startDate.weekday - 1) / 7).ceil();
+    currentWeek = ((currentDate.day + startDate.weekday - 1) / 7).ceil() - 1;
+    _pageController = PageController(initialPage: currentWeek);
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
-  /// Scrolls the calendar to the current date
-  void _scrollToCurrentDate() {
-    // Calculate scroll offset based on current date
-    final dayWidth = 68.0; // Container width (60) + margin (8)
-    final currentDayIndex = currentDate.day - 1;
-    final offset = currentDayIndex * dayWidth;
-
-    // Animate to the calculated position
-    _scrollController.animateTo(
-      offset,
+  void _scrollToCurrentWeek() {
+    _pageController.animateToPage(
+      currentWeek,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
   }
 
   /// Returns the current streak count from all habits
-  /// The streak increases when all habits are completed for the day
   int _getCurrentStreak() {
     final habitsState = ref.watch(habitListProvider);
     return habitsState.when(
@@ -77,7 +80,6 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
   }
 
   /// Checks if all habits were completed for a specific date
-  /// Returns true only if every habit was completed on that day
   bool _isDateCompleted(DateTime date) {
     final habitsState = ref.watch(habitListProvider);
     return habitsState.when(
@@ -95,9 +97,30 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
     );
   }
 
+  List<DateTime> _getDaysInWeek(int week) {
+    final List<DateTime> days = [];
+    final int firstDayOffset = startDate.weekday - 1;
+    final int startingDay = week * 7 - firstDayOffset;
+
+    for (int i = 0; i < 7; i++) {
+      final int dayNumber = startingDay + i;
+      if (dayNumber < 0 || dayNumber >= endDate.day) {
+        days.add(DateTime(
+            currentDate.year,
+            currentDate.month + (dayNumber < 0 ? -1 : 1),
+            dayNumber < 0 ? 31 + dayNumber : dayNumber - endDate.day + 1));
+      } else {
+        days.add(DateTime(currentDate.year, currentDate.month, dayNumber + 1));
+      }
+    }
+    return days;
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentStreak = _getCurrentStreak();
+    final screenWidth = MediaQuery.of(context).size.width;
+    final dayWidth = (screenWidth - 32) / 7;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,62 +148,68 @@ class _DailyStreakWidgetState extends ConsumerState<DailyStreakWidget> {
           ),
         ),
         Gap.low,
-        SingleChildScrollView(
-          controller: _scrollController,
-          physics: const PageScrollPhysics(),
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: List.generate(
-              endDate.day,
-              (index) {
-                DateTime date = startDate.add(Duration(days: index));
-                bool isCompleted = _isDateCompleted(date);
+        SizedBox(
+          height: 90,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: totalWeeks,
+            itemBuilder: (context, weekIndex) {
+              final weekDays = _getDaysInWeek(weekIndex);
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: weekDays.map((date) {
+                  final bool isCompleted = _isDateCompleted(date);
+                  final bool isCurrentDay = date.day == currentDate.day &&
+                      date.month == currentDate.month;
+                  final bool isCurrentMonth = date.month == currentDate.month;
 
-                return Container(
-                  width: 60,
-                  height: 80,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  margin: const EdgeInsets.only(right: 8),
-                  decoration: BoxDecoration(
-                    color: currentDate.day == date.day
-                        ? AppSecondaryColors.liquidLava.withOpacity(.7)
-                        : isCompleted
-                            ? AppSecondaryColors.liquidLava.withOpacity(.07)
-                            : Colors.grey[200],
-                    borderRadius: ProjectRadiusType.xLargeRadius.allRadius,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      isCompleted
-                          ? const Text(
-                              '🔥',
-                              style: TextStyle(fontSize: 17),
-                            )
-                          : Container(
-                              width: 16,
-                              height: 16,
-                              margin: const EdgeInsets.symmetric(vertical: 3),
-                              decoration: BoxDecoration(
-                                color: currentDate.day == date.day
-                                    ? AppSecondaryColors.liquidLava
-                                    : Colors.grey[400],
-                                shape: BoxShape.circle,
+                  return Container(
+                    width: dayWidth,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    decoration: BoxDecoration(
+                      color: isCurrentDay
+                          ? AppSecondaryColors.liquidLava.withOpacity(.7)
+                          : isCompleted
+                              ? AppSecondaryColors.liquidLava.withOpacity(.07)
+                              : Colors.grey[200],
+                      borderRadius: ProjectRadiusType.xLargeRadius.allRadius,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        isCompleted
+                            ? const Text(
+                                '🔥',
+                                style: TextStyle(fontSize: 17),
+                              )
+                            : Container(
+                                width: 16,
+                                height: 16,
+                                margin: const EdgeInsets.symmetric(vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: isCurrentDay
+                                      ? AppSecondaryColors.liquidLava
+                                      : Colors.grey[400],
+                                  shape: BoxShape.circle,
+                                ),
                               ),
-                            ),
-                      Text(
-                        DateFormat('d \n EEE').format(date),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
+                        Text(
+                          DateFormat('d\nEEE').format(date),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: isCurrentMonth ? Colors.black : Colors.grey,
+                            fontWeight: isCurrentMonth
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              );
+            },
           ),
         ),
       ],
