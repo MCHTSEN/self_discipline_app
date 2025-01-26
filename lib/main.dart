@@ -25,24 +25,13 @@ class MyApp extends ConsumerWidget {
 
     return ResponsiveSizer(
       builder: (context, orientation, screenType) {
-        return MaterialApp(
-          home: OnboardingPage(
-            pages: [
-              FirstScreen(),
-              IdentifyPage(),
-              SocialProofPage(),
-            ],
-            showBackButtons: [false, false, false],
-            showNextButtons: [true, false, false],
-            onComplete: () {
-              router.push(const HomeRoute());
-            },
-          ),
+        return MaterialApp.router(
           debugShowCheckedModeBanner: false,
           title: 'Self Discipline',
           theme: AppTheme.lightTheme(),
           darkTheme: AppTheme.darkTheme(),
           themeMode: themeMode,
+          routerConfig: router.config(),
         );
       },
     );

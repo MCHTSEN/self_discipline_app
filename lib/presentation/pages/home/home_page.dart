@@ -30,25 +30,6 @@ class HomePage extends ConsumerStatefulWidget {
 
 class HomePageState extends ConsumerState<HomePage> {
   @override
-  void initState() {
-    super.initState();
-    context.router.push(
-      OnboardingRoute(
-        pages: [
-          FirstScreen(),
-          IdentifyPage(),
-          SocialProofPage(),
-        ],
-        showBackButtons: [false, false],
-        showNextButtons: [true, false],
-        onComplete: () {
-          // Do something
-        },
-      ),
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
     final habitListState = ref.watch(habitListProvider);
     final formattedCurrentMonth = DateFormat.MMMM().format(DateTime.now());

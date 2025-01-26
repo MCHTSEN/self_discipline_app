@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:self_discipline_app/core/router/app_router.dart';
 import 'package:self_discipline_app/core/utils/enums/custom_images.dart';
 import 'package:self_discipline_app/domain/entities/testimonial_entity.dart';
 import 'package:self_discipline_app/core/utils/enums/custom_lottie.dart';
@@ -343,7 +344,7 @@ class SocialProofPage extends StatelessWidget {
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () {
-              // Navigate to habit creation or dashboard
+              context.router.push(const HomeRoute());
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFF6B4EFF),
