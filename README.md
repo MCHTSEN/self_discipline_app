@@ -13,7 +13,7 @@
 
 ---
 
-## Screenshots 📸
+## Screenshots 
 
 ### Home Screen
 <img src="https://github.com/user-attachments/assets/1a44f022-73eb-4dba-be91-c294de299410" alt="Home Screen" width="400"/>
